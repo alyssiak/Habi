@@ -6,15 +6,21 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F61DCA102FB34EC800BB09B3 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = F61DCA0F2FB34EC800BB09B3 /* SnapKit */; };
+		F6FB29ED2FB6714A00FB4E39 /* AGENTS.md in Resources */ = {isa = PBXBuildFile; fileRef = F6FB29EC2FB6714600FB4E39 /* AGENTS.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		F664A88B2FA3617600CB0B97 /* HabitTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HabitTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6FB29EC2FB6714600FB4E39 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		F664A8A02FA3617700CB0B97 /* Exceptions for "HabitTracker" folder in "HabitTracker" target */ = {
+		F6E13F832FA9C8E00031065C /* Exceptions for "HabitTracker" folder in "HabitTracker" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				App/Resources/Info.plist,
 			);
 			target = F664A88A2FA3617600CB0B97 /* HabitTracker */;
 		};
@@ -24,7 +30,7 @@
 		F664A88D2FA3617600CB0B97 /* HabitTracker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				F664A8A02FA3617700CB0B97 /* Exceptions for "HabitTracker" folder in "HabitTracker" target */,
+				F6E13F832FA9C8E00031065C /* Exceptions for "HabitTracker" folder in "HabitTracker" target */,
 			);
 			path = HabitTracker;
 			sourceTree = "<group>";
@@ -36,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F61DCA102FB34EC800BB09B3 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,8 +52,9 @@
 		F664A8822FA3617600CB0B97 = {
 			isa = PBXGroup;
 			children = (
-				F664A88D2FA3617600CB0B97 /* HabitTracker */,
+				F6FB29EC2FB6714600FB4E39 /* AGENTS.md */,
 				F664A88C2FA3617600CB0B97 /* Products */,
+				F664A88D2FA3617600CB0B97 /* HabitTracker */,
 			);
 			sourceTree = "<group>";
 		};
@@ -78,6 +86,7 @@
 			);
 			name = HabitTracker;
 			packageProductDependencies = (
+				F61DCA0F2FB34EC800BB09B3 /* SnapKit */,
 			);
 			productName = HabitTracker;
 			productReference = F664A88B2FA3617600CB0B97 /* HabitTracker.app */;
@@ -107,6 +116,9 @@
 			);
 			mainGroup = F664A8822FA3617600CB0B97;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F61DCA0E2FB34EC800BB09B3 /* XCRemoteSwiftPackageReference "SnapKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F664A88C2FA3617600CB0B97 /* Products */;
 			projectDirPath = "";
@@ -122,6 +134,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6FB29ED2FB6714A00FB4E39 /* AGENTS.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,7 +160,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = ZZS9S7F6CF;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = HabitTracker/Info.plist;
+				INFOPLIST_FILE = HabitTracker/App/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -175,7 +188,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = ZZS9S7F6CF;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = HabitTracker/Info.plist;
+				INFOPLIST_FILE = HabitTracker/App/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -337,6 +350,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F61DCA0E2FB34EC800BB09B3 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F61DCA0F2FB34EC800BB09B3 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F61DCA0E2FB34EC800BB09B3 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F664A8832FA3617600CB0B97 /* Project object */;
 }

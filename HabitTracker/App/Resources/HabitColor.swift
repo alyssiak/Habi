@@ -8,17 +8,19 @@
 import Foundation
 import UIKit
 
-final class ColorPalette {
+enum ColorPalettes {
     struct HabitColor {
         let hex: String
         let uiColor: UIColor
     }
 
-    static let palette: [HabitColor] = [
+    static let ColorPalette: [HabitColor] = [
         HabitColor(hex: "#FF6347", uiColor: .systemRed),
         HabitColor(hex: "#FFFDE7", uiColor: .systemYellow),
         HabitColor(hex: "#E7FFC5", uiColor: .systemGreen),
         HabitColor(hex: "#B2F5A9", uiColor: .systemBlue),
     ]
 }
+   
+
 

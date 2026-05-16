@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+import CoreData
+
+class Test {
+    let habit = Habit(context: CoreDataService.shared.context)
+    
+}
