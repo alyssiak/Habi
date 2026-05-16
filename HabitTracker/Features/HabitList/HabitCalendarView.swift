@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SnapKit
 
 final class HabitCalendarView: UIView {
     private let mainStackView = UIStackView()
@@ -13,19 +14,21 @@ final class HabitCalendarView: UIView {
     private enum Layout {
         static let cellSize: CGFloat = 7
         static let cellCornerRadius: CGFloat = 2.5
-        static let itemSpacing: CGFloat = 3
+        static let itemSpacing: CGFloat = 2
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         setupView()
+        setupConstraints()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         
         setupView()
+        setupConstraints()
     }
     
     func configure(days: [HabitCalendarDay]) {
@@ -42,12 +45,15 @@ final class HabitCalendarView: UIView {
                 rowStackView.axis = .horizontal
                 rowStackView.distribution = .fillEqually
                 rowStackView.alignment = .center
-                rowStackView.spacing = 2
+                rowStackView.spacing = Layout.itemSpacing
                 
                 row.forEach { day in
                     let dayView = UIView()
-                    dayView.layer.cornerRadius = 2.5
-                    dayView.heightAnchor.constraint(equalToConstant: 7).isActive = true
+                    
+                    dayView.layer.cornerRadius = Layout.cellCornerRadius
+                    dayView.snp.makeConstraints { make in
+                        make.height.width.equalTo(Layout.cellSize)
+                    }
                     
                     switch day.state {
                     case .future:
@@ -63,8 +69,11 @@ final class HabitCalendarView: UIView {
                 
                 while rowStackView.arrangedSubviews.count < 7 {
                     let emptyView = UIView()
-                    emptyView.heightAnchor.constraint(equalToConstant: 7).isActive = true
+                    
                     emptyView.backgroundColor = .clear
+                    emptyView.snp.makeConstraints { make in
+                        make.height.width.equalTo(Layout.cellSize)
+                    }
                     
                     rowStackView.addArrangedSubview(emptyView)
                 }
@@ -78,22 +87,19 @@ final class HabitCalendarView: UIView {
     
     private func setupView() {
         clipsToBounds = true
-        translatesAutoresizingMaskIntoConstraints = false
         
         mainStackView.axis = .vertical
         mainStackView.alignment = .fill
         mainStackView.distribution = .fill
-        mainStackView.spacing = 2
-        
-        mainStackView.translatesAutoresizingMaskIntoConstraints = false
+        mainStackView.spacing = Layout.itemSpacing
         
         addSubview(mainStackView)
-        
-        NSLayoutConstraint.activate([
-            mainStackView.topAnchor.constraint(equalTo: topAnchor),
-            mainStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            mainStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            mainStackView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor),
-        ])
+    }
+    
+    private func setupConstraints() {
+        mainStackView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+            make.bottom.lessThanOrEqualToSuperview()
         }
+    }
 }
