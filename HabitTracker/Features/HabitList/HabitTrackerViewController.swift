@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import UIKit
 
 final class HabitTrackerViewController: UIViewController {
 
@@ -15,9 +16,21 @@ final class HabitTrackerViewController: UIViewController {
     private let addHabitButton = UIButton()
     private let headerStackView = UIStackView()
     private let textStackView = UIStackView()
-    private let habitsStackView = UIStackView()
+    private let habitsTableView = UITableView()
+    private var habitModels: [HabitCardModel] = []
     private let viewModel: HabitTrackerViewModel
 
+    private enum Layout {
+        static let horizontalInset: CGFloat = 20
+        static let headerTopOffset: CGFloat = 24
+        static let tableTopOffset: CGFloat = 26
+        static let avatarSize: CGFloat = 56
+        static let addButtonSize: CGFloat = 56
+        static let addButtonBottomOffset: CGFloat = 20
+        static let tableBottomInset: CGFloat = 88
+        static let rowHeight: CGFloat = 100
+    }
+    
     init(viewModel: HabitTrackerViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -32,7 +45,7 @@ final class HabitTrackerViewController: UIViewController {
         
         setupView()
         setupHeader()
-        setupHabitsStackView()
+        setupHabitsTableView()
         setupConstraints()
         bindViewModel()
         viewModel.loadHabits()
@@ -60,14 +73,12 @@ final class HabitTrackerViewController: UIViewController {
         addHabitButton.tintColor = .white
         addHabitButton.layer.cornerRadius = 8
         addHabitButton.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
-        addHabitButton.translatesAutoresizingMaskIntoConstraints = false
         
         textStackView.axis = .vertical
         textStackView.spacing = 6
         textStackView.addArrangedSubview(greetingLabel)
         textStackView.addArrangedSubview(motivationLabel)
         
-        headerStackView.translatesAutoresizingMaskIntoConstraints = false
         headerStackView.axis = .horizontal
         headerStackView.spacing = 16
         headerStackView.alignment = .center
@@ -77,11 +88,28 @@ final class HabitTrackerViewController: UIViewController {
         view.addSubview(addHabitButton)
     }
     
-    private func setupHabitsStackView() {
-        habitsStackView.translatesAutoresizingMaskIntoConstraints = false
-        habitsStackView.axis = .vertical
-        habitsStackView.spacing = 12
-        view.addSubview(habitsStackView)
+    private func setupHabitsTableView() {
+        habitsTableView.dataSource = self
+        habitsTableView.delegate = self
+        
+        habitsTableView.register(
+            HabitCardCell.self,
+            forCellReuseIdentifier: HabitCardCell.reuseIdentifier
+        )
+        
+        habitsTableView.separatorStyle = .none
+        habitsTableView.backgroundColor = .clear
+        habitsTableView.showsVerticalScrollIndicator = false
+        
+        habitsTableView.contentInset = UIEdgeInsets(
+            top: 0,
+            left: 0,
+            bottom: Layout.tableBottomInset,
+            right: 0
+        )
+        
+        view.addSubview(habitsTableView)
+        view.bringSubviewToFront(addHabitButton)
     }
     
     // подписываем контроллер на обновления
@@ -92,49 +120,32 @@ final class HabitTrackerViewController: UIViewController {
     }
     
     private func renderHabits(_ models: [HabitCardModel]) {
-        habitsStackView.arrangedSubviews.forEach { view in
-            view.removeFromSuperview()
-        }
-        
-        models.forEach { model in
-            let cardView = HabitCardView()
-            
-            cardView.configure(
-                title: model.title,
-                isDoneToday: model.isDoneToday,
-                emoji: model.emoji,
-                completedDays: model.completedDays,
-                totalDays: model.totalDays,
-                color: model.colorHex,
-                days: model.days,
-                streak: model.streak
-            )
-            
-            cardView.onDoneTapped = { [weak self] in
-                self?.viewModel.toggleToday(for: model.id)
-        }
-            habitsStackView.addArrangedSubview(cardView)
-     }
+        habitModels = models
+        habitsTableView.reloadData()
     }
     
     private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            avatarImageView.widthAnchor.constraint(equalToConstant: 56),
-            avatarImageView.heightAnchor.constraint(equalToConstant: 56),
-            
-            headerStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            headerStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            headerStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            habitsStackView.topAnchor.constraint(equalTo: headerStackView.bottomAnchor, constant: 32),
-            habitsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            habitsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            addHabitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            addHabitButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            addHabitButton.heightAnchor.constraint(equalToConstant: 56),
-            addHabitButton.widthAnchor.constraint(equalToConstant: 56)
-        ])
+        
+        avatarImageView.snp.makeConstraints { make in
+            make.size.equalTo(Layout.avatarSize)
+        }
+        
+        headerStackView.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(Layout.headerTopOffset)
+            make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
+        }
+        
+        habitsTableView.snp.makeConstraints { make in
+            make.top.equalTo(headerStackView.snp.bottom).offset(Layout.tableTopOffset)
+            make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
+            make.bottom.equalToSuperview()
+        }
+        
+        addHabitButton.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().inset(Layout.horizontalInset)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Layout.addButtonBottomOffset)
+            make.size.equalTo(Layout.addButtonSize)
+        }
     }
     
     @objc private func didTapAddButton() {
@@ -146,3 +157,33 @@ final class HabitTrackerViewController: UIViewController {
     }
 }
 
+extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return habitModels.count
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return Layout.rowHeight
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: HabitCardCell.reuseIdentifier,
+            for: indexPath
+        ) as? HabitCardCell else {
+            return UITableViewCell()
+        }
+        
+        let model = habitModels[indexPath.row]
+        cell.configure(with: model)
+        
+        cell.onDoneTapped = { [weak self] in
+            self?.viewModel.toggleToday(for: model.id)
+        }
+        
+        return cell
+    }
+    
+}
