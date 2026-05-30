@@ -40,7 +40,11 @@ final class HabitTrackerViewModel {
         loadHabits()
     }
     
-    func deleteHabit(_ habit: Habit) {
+    func deleteHabit(for habitId: NSManagedObjectID) {
+        guard let habit = habits.first(where: { $0.objectID == habitId }) else {
+            return
+        }
+        
         repository.deleteHabit(habit)
         loadHabits()
     }

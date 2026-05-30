@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import UIKit
+import SnapKit
 
 final class HabitTrackerViewController: UIViewController {
 
@@ -124,6 +124,30 @@ final class HabitTrackerViewController: UIViewController {
         habitsTableView.reloadData()
     }
     
+    private func confirmDeleteHabit(model: HabitCardModel, completion: @escaping (Bool) -> Void) {
+        let alertController = UIAlertController(
+            title: "Delete habit?",
+            message: "This will remove \"\(model.title)\" from your list.",
+            preferredStyle: .alert
+        )
+        
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            completion(false)
+        })
+        
+        alertController.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            guard let self else {
+                completion(false)
+                return
+            }
+            
+            viewModel.deleteHabit(for: model.id)
+            completion(true)
+        })
+        
+        present(alertController, animated: true)
+    }
+    
     private func setupConstraints() {
         
         avatarImageView.snp.makeConstraints { make in
@@ -186,4 +210,23 @@ extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate
         return cell
     }
     
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let model = habitModels[indexPath.row]
+        
+        let deleteAction = UIContextualAction(
+            style: .destructive,
+            title: "Delete") { [weak self] _, _, completion in
+                guard let self else {
+                    completion(false)
+                    return
+                }
+                
+                confirmDeleteHabit(model: model, completion: completion)
+            }
+            deleteAction.image = UIImage(systemName: "trash")
+            
+            return UISwipeActionsConfiguration(actions: [deleteAction])
+    
+        
+    }
 }
