@@ -10,6 +10,8 @@ import SnapKit
 
 final class HabitTrackerViewController: UIViewController {
 
+    // MARK: - UI
+    
     private let avatarImageView = UIImageView()
     private let greetingLabel = UILabel()
     private let motivationLabel = UILabel()
@@ -17,9 +19,17 @@ final class HabitTrackerViewController: UIViewController {
     private let headerStackView = UIStackView()
     private let textStackView = UIStackView()
     private let habitsTableView = UITableView()
+    private let emptyStateStackView = UIStackView()
+    private let emptyTitleLabel = UILabel()
+    private let emptySubtitleLabel = UILabel()
+    
+    // MARK: - State
+    
     private var habitModels: [HabitCardModel] = []
     private let viewModel: HabitTrackerViewModel
 
+    // MARK: - Layout
+    
     private enum Layout {
         static let horizontalInset: CGFloat = 20
         static let headerTopOffset: CGFloat = 24
@@ -32,6 +42,8 @@ final class HabitTrackerViewController: UIViewController {
         static let rowSpacing: CGFloat = 12
     }
     
+    // MARK: - Init
+    
     init(viewModel: HabitTrackerViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -41,22 +53,30 @@ final class HabitTrackerViewController: UIViewController {
         fatalError()
     }
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupView()
         setupHeader()
         setupHabitsTableView()
+        setupEmptyState()
         setupConstraints()
         bindViewModel()
         viewModel.loadHabits()
     }
+}
+
+// MARK: - Setup
+
+private extension HabitTrackerViewController {
   
-    private func setupView() {
+    func setupView() {
         view.backgroundColor = .systemBackground
     }
     
-    private func setupHeader() {
+    func setupHeader() {
         avatarImageView.image = UIImage(systemName: "person.circle")
         avatarImageView.tintColor = .systemGray
         avatarImageView.contentMode = .scaleAspectFit
@@ -89,7 +109,7 @@ final class HabitTrackerViewController: UIViewController {
         view.addSubview(addHabitButton)
     }
     
-    private func setupHabitsTableView() {
+    func setupHabitsTableView() {
         habitsTableView.dataSource = self
         habitsTableView.delegate = self
         
@@ -113,19 +133,112 @@ final class HabitTrackerViewController: UIViewController {
         view.bringSubviewToFront(addHabitButton)
     }
     
-    // подписываем контроллер на обновления
-    private func bindViewModel() {
+    func setupEmptyState() {
+        emptyTitleLabel.text = "No habits yet"
+        emptyTitleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 20)
+        emptyTitleLabel.textColor = .label
+        emptyTitleLabel.textAlignment = .center
+        
+        emptySubtitleLabel.text = "Tap + to add your first habit"
+        emptySubtitleLabel.font = UIFont(name: "Montserrat-Regular", size: 15)
+        emptySubtitleLabel.textColor = .secondaryLabel
+        emptySubtitleLabel.textAlignment = .center
+        emptySubtitleLabel.numberOfLines = 0
+        
+        emptyStateStackView.axis = .vertical
+        emptyStateStackView.spacing = 8
+        emptyStateStackView.alignment = .center
+        emptyStateStackView.isHidden = true
+        emptyStateStackView.addArrangedSubview(emptyTitleLabel)
+        emptyStateStackView.addArrangedSubview(emptySubtitleLabel)
+        
+        view.addSubview(emptyStateStackView)
+        view.bringSubviewToFront(addHabitButton)
+    }
+    
+    func setupConstraints() {
+        
+        avatarImageView.snp.makeConstraints { make in
+            make.size.equalTo(Layout.avatarSize)
+        }
+        
+        headerStackView.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(Layout.headerTopOffset)
+            make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
+        }
+        
+        habitsTableView.snp.makeConstraints { make in
+            make.top.equalTo(headerStackView.snp.bottom).offset(Layout.tableTopOffset)
+            make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
+            make.bottom.equalToSuperview()
+        }
+        
+        emptyStateStackView.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
+            make.centerY.equalToSuperview().offset(40)
+        }
+        
+        addHabitButton.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().inset(Layout.horizontalInset)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Layout.addButtonBottomOffset)
+            make.size.equalTo(Layout.addButtonSize)
+        }
+    }
+}
+
+// MARK: - Binding
+
+private extension HabitTrackerViewController {
+    
+    func bindViewModel() {
         viewModel.onHabitsChanged = { [weak self] models in
             self?.renderHabits(models)
         }
     }
     
-    private func renderHabits(_ models: [HabitCardModel]) {
+    func renderHabits(_ models: [HabitCardModel]) {
         habitModels = models
         habitsTableView.reloadData()
+        updateEmptyState()
     }
     
-    private func confirmDeleteHabit(model: HabitCardModel, completion: @escaping (Bool) -> Void = {_ in}) {
+    func updateEmptyState() {
+        let isEmpty = habitModels.isEmpty
+        
+        habitsTableView.isHidden = isEmpty
+        emptyStateStackView.isHidden = !isEmpty
+    }
+}
+
+// MARK: - Actions
+
+private extension HabitTrackerViewController {
+    
+    @objc func didTapAddButton() {
+        let addHabitViewController = AddHabitViewController(viewModel: viewModel)
+        addHabitViewController.onHabitSaved = { [weak self] in
+            self?.viewModel.loadHabits()
+        }
+        present(addHabitViewController, animated: true)
+    }
+    
+    func openEditHabit(model: HabitCardModel) {
+        let addHabitViewController = AddHabitViewController(
+            viewModel: viewModel,
+            mode: .edit(model)
+        )
+        
+        addHabitViewController.onHabitSaved = { [weak self] in
+            self?.viewModel.loadHabits()
+        }
+        
+        present(addHabitViewController, animated: true)
+    }
+    
+    func confirmDeleteHabit(
+        model: HabitCardModel,
+        completion: @escaping (Bool) -> Void = { _ in }
+    ) {
         let alertController = UIAlertController(
             title: "Delete habit?",
             message: "This will remove \"\(model.title)\" from your list.",
@@ -148,54 +261,11 @@ final class HabitTrackerViewController: UIViewController {
         
         present(alertController, animated: true)
     }
-    
-    private func openEditHabit(model: HabitCardModel) {
-        let addHabitViewController = AddHabitViewController(
-            viewModel: viewModel,
-            mode: .edit(model)
-            )
-        
-        addHabitViewController.onHabitAdded = { [weak self] in
-            self?.viewModel.loadHabits()
-        }
-        
-        present(addHabitViewController, animated: true)
-    }
-    
-    private func setupConstraints() {
-        
-        avatarImageView.snp.makeConstraints { make in
-            make.size.equalTo(Layout.avatarSize)
-        }
-        
-        headerStackView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(Layout.headerTopOffset)
-            make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
-        }
-        
-        habitsTableView.snp.makeConstraints { make in
-            make.top.equalTo(headerStackView.snp.bottom).offset(Layout.tableTopOffset)
-            make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
-            make.bottom.equalToSuperview()
-        }
-        
-        addHabitButton.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().inset(Layout.horizontalInset)
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Layout.addButtonBottomOffset)
-            make.size.equalTo(Layout.addButtonSize)
-        }
-    }
-    
-    @objc private func didTapAddButton() {
-        let addHabitViewController = AddHabitViewController(viewModel: viewModel)
-        addHabitViewController.onHabitAdded = { [weak self] in
-            self?.viewModel.loadHabits()
-        }
-        present(addHabitViewController, animated: true)
-    }
 }
 
-extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate {
+// MARK: - UITableViewDataSource
+
+extension HabitTrackerViewController: UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return habitModels.count
@@ -205,19 +275,6 @@ extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate
         return 1
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return Layout.rowHeight
-    }
-    
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return Layout.rowSpacing
-    }
-    
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        let view = UIView()
-        view.backgroundColor = .clear
-        return view
-    }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         guard let cell = tableView.dequeueReusableCell(
@@ -236,28 +293,54 @@ extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate
         
         return cell
     }
+}
+
+// MARK: - UITableViewDelegate
+
+extension HabitTrackerViewController: UITableViewDelegate {
     
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return Layout.rowHeight
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return Layout.rowSpacing
+    }
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let view = UIView()
+        view.backgroundColor = .clear
+        return view
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+    ) -> UISwipeActionsConfiguration? {
         let model = habitModels[indexPath.section]
         
         let deleteAction = UIContextualAction(
             style: .destructive,
             title: "Delete"
         ) { [weak self] _, _, completion in
-                guard let self else {
-                    completion(false)
-                    return
-                }
-                
-                confirmDeleteHabit(model: model, completion: completion)
+            guard let self else {
+                completion(false)
+                return
             }
-            deleteAction.image = UIImage(systemName: "trash")
+            
+            confirmDeleteHabit(model: model, completion: completion)
+        }
+        deleteAction.image = UIImage(systemName: "trash")
         
-            let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
-            return configuration
+        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+        configuration.performsFirstActionWithFullSwipe = false
+        return configuration
     }
     
-    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    func tableView(
+        _ tableView: UITableView,
+        leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+    ) -> UISwipeActionsConfiguration? {
         let model = habitModels[indexPath.section]
         
         let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] _, _, completion in
@@ -274,10 +357,15 @@ extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate
         editAction.image = UIImage(systemName: "square.and.pencil")
         
         let configuration = UISwipeActionsConfiguration(actions: [editAction])
+        configuration.performsFirstActionWithFullSwipe = false
         return configuration
     }
     
-    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
         let model = habitModels[indexPath.section]
         
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
@@ -297,7 +385,6 @@ extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate
             }
             
             return UIMenu(children: [editAction, deleteAction])
-    
         }
     }
 }

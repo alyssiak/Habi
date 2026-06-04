@@ -23,7 +23,7 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
     private let viewModel: HabitTrackerViewModel
     private let mode: Mode
     
-    var onHabitAdded: (() -> Void)?
+    var onHabitSaved: (() -> Void)?
     
     init(viewModel: HabitTrackerViewModel, mode: Mode = .add) {
         self.viewModel = viewModel
@@ -132,7 +132,7 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
                 )
         }
         
-        onHabitAdded?()
+        onHabitSaved?()
         // закрыть экран
         dismiss(animated: true)
     }

@@ -51,7 +51,7 @@ final class AddHabitView: UIView {
         emojiCollectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "EmojiCollectionViewCell")
         colorCollectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "ColorCollectionViewCell")
         
-        titleTextField.placeholder = "Read a bo.."
+        titleTextField.placeholder = "Habit name"
         titleTextField.font = UIFont(name: "Montserrat-Regular", size: 18)
         titleTextField.borderStyle = .roundedRect
         
