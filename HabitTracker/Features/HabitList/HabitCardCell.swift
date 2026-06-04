@@ -53,13 +53,16 @@ final class HabitCardCell: UITableViewCell {
         selectionStyle = .none
         backgroundColor = .clear
         contentView.backgroundColor = .clear
-        
+        backgroundView = UIView()
+        backgroundView?.backgroundColor = .clear
+        selectedBackgroundView = UIView()
+        selectedBackgroundView?.backgroundColor = .clear
         contentView.addSubview(cardView)
     }
     
     private func setupConstraints(){
         cardView.snp.makeConstraints { make in
-            make.top.bottom.equalToSuperview().inset(6)
+            make.top.bottom.equalToSuperview()
             make.leading.trailing.equalToSuperview()
         }
     }

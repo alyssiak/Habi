@@ -28,7 +28,6 @@ final class HabitCardView: UIView {
     var onDoneTapped: (() -> Void)?
     
     private enum Layout {
-        static let cardHeight: CGFloat = 88
         static let contentInsets = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)
         static let doneButtonSize: CGFloat = 16
         static let emojiSize: CGFloat = 22

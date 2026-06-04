@@ -28,7 +28,8 @@ final class HabitTrackerViewController: UIViewController {
         static let addButtonSize: CGFloat = 56
         static let addButtonBottomOffset: CGFloat = 20
         static let tableBottomInset: CGFloat = 88
-        static let rowHeight: CGFloat = 100
+        static let rowHeight: CGFloat = 88
+        static let rowSpacing: CGFloat = 12
     }
     
     init(viewModel: HabitTrackerViewModel) {
@@ -124,7 +125,7 @@ final class HabitTrackerViewController: UIViewController {
         habitsTableView.reloadData()
     }
     
-    private func confirmDeleteHabit(model: HabitCardModel, completion: @escaping (Bool) -> Void) {
+    private func confirmDeleteHabit(model: HabitCardModel, completion: @escaping (Bool) -> Void = {_ in}) {
         let alertController = UIAlertController(
             title: "Delete habit?",
             message: "This will remove \"\(model.title)\" from your list.",
@@ -146,6 +147,19 @@ final class HabitTrackerViewController: UIViewController {
         })
         
         present(alertController, animated: true)
+    }
+    
+    private func openEditHabit(model: HabitCardModel) {
+        let addHabitViewController = AddHabitViewController(
+            viewModel: viewModel,
+            mode: .edit(model)
+            )
+        
+        addHabitViewController.onHabitAdded = { [weak self] in
+            self?.viewModel.loadHabits()
+        }
+        
+        present(addHabitViewController, animated: true)
     }
     
     private func setupConstraints() {
@@ -183,14 +197,27 @@ final class HabitTrackerViewController: UIViewController {
 
 extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate {
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return habitModels.count
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return Layout.rowHeight
     }
     
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return Layout.rowSpacing
+    }
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let view = UIView()
+        view.backgroundColor = .clear
+        return view
+    }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         guard let cell = tableView.dequeueReusableCell(
@@ -200,7 +227,7 @@ extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate
             return UITableViewCell()
         }
         
-        let model = habitModels[indexPath.row]
+        let model = habitModels[indexPath.section]
         cell.configure(with: model)
         
         cell.onDoneTapped = { [weak self] in
@@ -211,11 +238,12 @@ extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate
     }
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let model = habitModels[indexPath.row]
+        let model = habitModels[indexPath.section]
         
         let deleteAction = UIContextualAction(
             style: .destructive,
-            title: "Delete") { [weak self] _, _, completion in
+            title: "Delete"
+        ) { [weak self] _, _, completion in
                 guard let self else {
                     completion(false)
                     return
@@ -224,9 +252,52 @@ extension HabitTrackerViewController: UITableViewDataSource, UITableViewDelegate
                 confirmDeleteHabit(model: model, completion: completion)
             }
             deleteAction.image = UIImage(systemName: "trash")
-            
-            return UISwipeActionsConfiguration(actions: [deleteAction])
-    
         
+            let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+            return configuration
+    }
+    
+    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let model = habitModels[indexPath.section]
+        
+        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] _, _, completion in
+            guard let self else {
+                completion(false)
+                return
+            }
+            
+            openEditHabit(model: model)
+            completion(true)
+        }
+        
+        editAction.backgroundColor = .systemBlue
+        editAction.image = UIImage(systemName: "square.and.pencil")
+        
+        let configuration = UISwipeActionsConfiguration(actions: [editAction])
+        return configuration
+    }
+    
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let model = habitModels[indexPath.section]
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            let editAction = UIAction(
+                title: "Edit",
+                image: UIImage(systemName: "square.and.pencil")
+            ) { _ in
+                self?.openEditHabit(model: model)
+            }
+            
+            let deleteAction = UIAction(
+                title: "Delete",
+                image: UIImage(systemName: "trash"),
+                attributes: .destructive
+            ) { [weak self] _ in
+                self?.confirmDeleteHabit(model: model)
+            }
+            
+            return UIMenu(children: [editAction, deleteAction])
+    
+        }
     }
 }

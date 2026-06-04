@@ -35,7 +35,11 @@ final class HabitTrackerViewModel {
         loadHabits()
     }
     
-    func updateHabit(_ habit: Habit, title: String, emoji: String?, colorHex: String?) {
+    func updateHabit(for habitId: NSManagedObjectID, title: String, emoji: String?, colorHex: String?) {
+        guard let habit = habits.first(where: {$0.objectID == habitId}) else {
+            return 
+        }
+        
         repository.updateHabit(habit, title: title, emoji: emoji, colorHex: colorHex)
         loadHabits()
     }

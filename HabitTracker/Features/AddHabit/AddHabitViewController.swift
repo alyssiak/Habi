@@ -10,19 +10,24 @@ import SnapKit
 
 final class AddHabitViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
    
+    enum Mode {
+        case add
+        case edit(HabitCardModel)
+    }
     
     private let emojiList = ["🔥", "📚", "💧", "🏃‍♀️", "🧘‍♀️", "🎯", "🍎"]
     private let colorList = ColorPalettes.ColorPalette
     private let addHabitView = AddHabitView()
     private var selectedEmoji: String?
     private var selectedColor: String?
-    
     private let viewModel: HabitTrackerViewModel
+    private let mode: Mode
     
     var onHabitAdded: (() -> Void)?
     
-    init(viewModel: HabitTrackerViewModel) {
+    init(viewModel: HabitTrackerViewModel, mode: Mode = .add) {
         self.viewModel = viewModel
+        self.mode = mode
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -33,9 +38,6 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        selectedEmoji = emojiList.first
-        selectedColor = colorList.first?.hex
-        
         addHabitView.emojiCollectionView.delegate = self
         addHabitView.colorCollectionView.delegate = self
         
@@ -43,6 +45,24 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
         addHabitView.colorCollectionView.dataSource = self
         
         addHabitView.saveButton.addTarget(self, action: #selector(didTapSave), for: .touchUpInside)
+        configureMode()
+    }
+    
+    private func configureMode() {
+        switch mode {
+            case .add:
+                selectedColor = colorList.first?.hex
+                selectedEmoji = emojiList.first
+                addHabitView.saveButton.setTitle("Save", for: .normal)
+            case .edit(let model):
+                selectedColor = model.colorHex
+                selectedEmoji = model.emoji
+                addHabitView.titleTextField.text = model.title
+                addHabitView.saveButton.setTitle("Update", for: .normal)
+        }
+        
+        addHabitView.emojiCollectionView.reloadData()
+        addHabitView.colorCollectionView.reloadData()
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -96,11 +116,21 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
         let title = addHabitView.titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         guard !title.isEmpty else { return }
         
-        viewModel.addHabit(
-            title: title,
-            emoji: selectedEmoji,
-            colorHex: selectedColor
-        )
+        switch mode {
+            case .add:
+                viewModel.addHabit(
+                    title: title,
+                    emoji: selectedEmoji,
+                    colorHex: selectedColor
+                )
+            case .edit(let model):
+                viewModel.updateHabit(
+                    for: model.id,
+                    title: title,
+                    emoji: selectedEmoji,
+                    colorHex: selectedColor
+                )
+        }
         
         onHabitAdded?()
         // закрыть экран
