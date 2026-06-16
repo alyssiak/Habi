@@ -63,6 +63,14 @@ final class HabitTrackerViewModel {
         loadHabits()
     }
 
+    func toggleHabitRecord(for habitId: NSManagedObjectID, date: Date) {
+        guard let habit = habits.first(where: { $0.objectID == habitId }) else {
+            return
+        }
+        repository.toggleHabitRecord(habit, date: date)
+        loadHabits()
+    }
+
     //MARK: - Private Helpers
     private func mapToCardModel(habit: Habit) -> HabitCardModel {
         let records = habit.records as? Set<HabitRecord> ?? []

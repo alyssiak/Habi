@@ -395,6 +395,7 @@ private extension HabitTrackerViewController {
             scheduleUndoBannerHide()
         }
     }
+
 }
 
 // MARK: - UITableViewDataSource
@@ -520,5 +521,13 @@ extension HabitTrackerViewController: UITableViewDelegate {
 
             return UIMenu(children: [editAction, deleteAction])
         }
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let model = habitModels[indexPath.section]
+        let detailsViewController = HabitDetailsViewController(habit: model)
+        
+        present(detailsViewController, animated: true)
     }
 }

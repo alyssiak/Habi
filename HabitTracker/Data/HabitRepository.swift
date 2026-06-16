@@ -110,17 +110,18 @@ final class HabitRepository: HabitRepositoryProtocol {
         let startOfDay = calendar.startOfDay(for: date)
 
         // берем полночь следующего дня
-        guard let nextDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)
-        else {
+        guard let nextDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
             return
         }
 
         let fetchRequest: NSFetchRequest<HabitRecord> = HabitRecord.fetchRequest()
 
-        fetchRequest.predicate = NSPredicate(format: "habit == %@ AND date >= %@ AND date < %@",
-                                    habit,
-                                    startOfDay as NSDate,
-                                    nextDay as NSDate)
+        fetchRequest.predicate = NSPredicate(
+            format: "habit == %@ AND date >= %@ AND date < %@",
+            habit,
+            startOfDay as NSDate,
+            nextDay as NSDate
+        )
 
         fetchRequest.fetchLimit = 1
 
@@ -144,10 +145,41 @@ final class HabitRepository: HabitRepositoryProtocol {
     }
 
     func fetchRecords(for habit: Habit) -> [HabitRecord] {
-        return []
+        let request: NSFetchRequest<HabitRecord> = HabitRecord.fetchRequest()
+        request.predicate = NSPredicate(format: "habit == %@", habit)
+        request.sortDescriptors = [NSSortDescriptor(key: "date", ascending: true)]
+
+        do {
+            return try context.fetch(request)
+        } catch {
+            print(error)
+            return []
+        }
     }
 
     func isHabitCompleted(_ habit: Habit, on date: Date) -> Bool {
-        return false
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+        guard let nextDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
+            return false
+        }
+
+        let fetchRequest: NSFetchRequest<HabitRecord> = HabitRecord.fetchRequest()
+
+        fetchRequest.predicate = NSPredicate(
+            format: "habit == %@ AND date >= %@ AND date < %@ AND isCompleted == YES",
+            habit,
+            startOfDay as NSDate,
+            nextDay as NSDate
+        )
+
+        fetchRequest.fetchLimit = 1
+
+        do {
+            return try context.count(for: fetchRequest) > 0
+        } catch {
+            print(error)
+            return false
+        }
     }
 }
