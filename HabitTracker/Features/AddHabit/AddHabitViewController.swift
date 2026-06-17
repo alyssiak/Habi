@@ -16,7 +16,7 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
     }
     
     private let emojiList = ["🔥", "📚", "💧", "🏃‍♀️", "🧘‍♀️", "🎯", "🍎"]
-    private let colorList = ColorPalettes.ColorPalette
+    private let colorList = ColorPalettes.habitPalette
     private let addHabitView = AddHabitView()
     private var selectedEmoji: String?
     private var selectedColor: String?

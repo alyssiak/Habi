@@ -228,9 +228,7 @@ final class HabitCardView: UIView {
             return .systemOrange
         }
         
-        return ColorPalettes.ColorPalette.first { color in
-            color.hex == hex
-        }?.uiColor ?? .systemOrange
+        return UIColor(hex: hex)
     }
     
     private func updateStreak(streak: Int) {

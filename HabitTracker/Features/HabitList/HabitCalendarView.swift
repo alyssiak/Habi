@@ -57,11 +57,11 @@ final class HabitCalendarView: UIView {
                     
                     switch day.state {
                     case .future:
-                        dayView.backgroundColor = .systemGray5
+                        dayView.backgroundColor = .nextDaysGray
                     case .completed:
-                        dayView.backgroundColor = .systemOrange
+                        dayView.backgroundColor = .appOrange
                     case .missed:
-                        dayView.backgroundColor = .systemGray4
+                        dayView.backgroundColor = .lastDaysGray
                     }
                     
                     rowStackView.addArrangedSubview(dayView)
