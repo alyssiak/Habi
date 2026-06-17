@@ -8,9 +8,11 @@
 import UIKit
 import SnapKit
 import CoreData
+import Combine
 
 final class HabitTrackerViewController: UIViewController {
 
+    private var cancellables = Set<AnyCancellable>()
     // MARK: - UI
 
     private let avatarImageView = UIImageView()
@@ -263,9 +265,13 @@ private extension HabitTrackerViewController {
             self?.renderHabits(models)
         }
         
-        viewModel.onQuoteChanged = { [weak self] quote in
-            self?.renderQuote(quote)
-        }
+        viewModel.$quote
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] quote in
+                self?.renderQuote(quote)
+            }
+            // & здесь значит, что мы передаем cancellables как изменяемое хранилище.
+            .store(in: &cancellables)
     }
 
     func renderHabits(_ models: [HabitCardModel]) {

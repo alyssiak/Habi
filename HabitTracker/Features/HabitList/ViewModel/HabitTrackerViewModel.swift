@@ -7,16 +7,16 @@
 
 import Foundation
 import CoreData
+import Combine
 
 final class HabitTrackerViewModel {
     private let repository: HabitRepositoryProtocol
     private let quoteService: QuoteServiceProtocol
     
     private(set) var habits: [Habit] = []
-    private(set) var quote: Quote?
+    @Published private(set) var quote: Quote?
     
     var onUpdate: (() -> Void)?
-    var onQuoteChanged: ((Quote?) -> Void)?
     var onHabitsChanged: (([HabitCardModel]) -> Void)?
 
     init(repository: HabitRepositoryProtocol, quoteService: QuoteServiceProtocol) {
@@ -79,15 +79,14 @@ final class HabitTrackerViewModel {
     func loadQuote() async {
         do {
             let quote = try await quoteService.fetchQuote()
-            self.quote = quote
             await MainActor.run {
-                self.onQuoteChanged?(quote)
+                self.quote = quote
             }
         } catch {
             print(error)
             
             await MainActor.run {
-                self.onQuoteChanged?(nil)
+                self.quote = nil
             }
         }
     }
