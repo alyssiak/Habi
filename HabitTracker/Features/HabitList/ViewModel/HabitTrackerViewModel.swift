@@ -10,14 +10,18 @@ import CoreData
 
 final class HabitTrackerViewModel {
     private let repository: HabitRepositoryProtocol
-
+    private let quoteService: QuoteServiceProtocol
+    
     private(set) var habits: [Habit] = []
-
+    private(set) var quote: Quote?
+    
     var onUpdate: (() -> Void)?
+    var onQuoteChanged: ((Quote?) -> Void)?
     var onHabitsChanged: (([HabitCardModel]) -> Void)?
 
-    init(repository: HabitRepositoryProtocol) {
+    init(repository: HabitRepositoryProtocol, quoteService: QuoteServiceProtocol) {
         self.repository = repository
+        self.quoteService = quoteService
     }
 
     //MARK: - Public Methods
@@ -69,8 +73,24 @@ final class HabitTrackerViewModel {
         }
         repository.toggleHabitRecord(habit, date: date)
         loadHabits()
+        
     }
 
+    func loadQuote() async {
+        do {
+            let quote = try await quoteService.fetchQuote()
+            self.quote = quote
+            await MainActor.run {
+                self.onQuoteChanged?(quote)
+            }
+        } catch {
+            print(error)
+            
+            await MainActor.run {
+                self.onQuoteChanged?(nil)
+            }
+        }
+    }
     //MARK: - Private Helpers
     private func mapToCardModel(habit: Habit) -> HabitCardModel {
         let records = habit.records as? Set<HabitRecord> ?? []

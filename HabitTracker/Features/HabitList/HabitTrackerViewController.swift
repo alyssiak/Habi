@@ -15,7 +15,8 @@ final class HabitTrackerViewController: UIViewController {
 
     private let avatarImageView = UIImageView()
     private let greetingLabel = UILabel()
-    private let motivationLabel = UILabel()
+    private let quoteTextLabel = UILabel()
+    private let quoteAuthorLabel = UILabel()
     private let addHabitButton = UIButton()
     private let headerStackView = UIStackView()
     private let textStackView = UIStackView()
@@ -72,6 +73,7 @@ final class HabitTrackerViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+    
 
         setupView()
         setupHeader()
@@ -81,6 +83,10 @@ final class HabitTrackerViewController: UIViewController {
         setupConstraints()
         bindViewModel()
         viewModel.loadHabits()
+        
+        Task {
+            await viewModel.loadQuote()
+        }
     }
 }
 
@@ -100,10 +106,12 @@ private extension HabitTrackerViewController {
         greetingLabel.text = "Hello!"
         greetingLabel.font = UIFont(name: "Montserrat-SemiBold", size: 24)
 
-        motivationLabel.text = "Track your habits to stay motivated."
-        motivationLabel.textColor = .secondaryLabel
-        motivationLabel.font =  UIFont(name: "Montserrat-Regular", size: 18)
-        motivationLabel.numberOfLines = 0
+        quoteTextLabel.numberOfLines = 0
+        quoteTextLabel.font = UIFont(name: "Montserrat-Regular", size: 15)
+        quoteTextLabel.textColor = .label
+
+        quoteAuthorLabel.font = UIFont(name: "Montserrat-SemiBold", size: 13)
+        quoteAuthorLabel.textColor = .secondaryLabel
 
         addHabitButton.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
         addHabitButton.backgroundColor = .systemOrange
@@ -114,7 +122,8 @@ private extension HabitTrackerViewController {
         textStackView.axis = .vertical
         textStackView.spacing = 6
         textStackView.addArrangedSubview(greetingLabel)
-        textStackView.addArrangedSubview(motivationLabel)
+        textStackView.addArrangedSubview(quoteTextLabel)
+        textStackView.addArrangedSubview(quoteAuthorLabel)
 
         headerStackView.axis = .horizontal
         headerStackView.spacing = 16
@@ -253,12 +262,27 @@ private extension HabitTrackerViewController {
         viewModel.onHabitsChanged = { [weak self] models in
             self?.renderHabits(models)
         }
+        
+        viewModel.onQuoteChanged = { [weak self] quote in
+            self?.renderQuote(quote)
+        }
     }
 
     func renderHabits(_ models: [HabitCardModel]) {
         habitModels = models
         habitsTableView.reloadData()
         updateEmptyState()
+    }
+    
+    func renderQuote(_ quote: Quote?) {
+        guard let quote else {
+            quoteTextLabel.text = "Track your habits to stay motivated."
+            quoteAuthorLabel.text = nil
+            return
+        }
+        
+        quoteTextLabel.text = "\(quote.text)"
+        quoteAuthorLabel.text = "— \(quote.author)"
     }
 
     func updateEmptyState() {
