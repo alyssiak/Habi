@@ -21,13 +21,16 @@ final class HabitDetailsViewController: UIViewController {
     private let descriptionTitleLabel = UILabel()
     private let descriptionTextLabel = UILabel()
     private let descriptionContainerView = UIView()
-
+    private var calendarHeightConstraint: Constraint?
+    
     private let habit: HabitCardModel
     private let calendarView = HabitDetailsCalendarView()
     private let statsView = HabitDetailsStatsView()
+    private let viewModel: HabitDetailsViewModel
 
-    init(habit: HabitCardModel) {
+    init(habit: HabitCardModel, viewModel: HabitDetailsViewModel) {
         self.habit = habit
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -42,13 +45,30 @@ final class HabitDetailsViewController: UIViewController {
         setupHeader()
         setupNavigation()
         setupDescription()
-        setupConstrainsts()
+        setupConstraints()
+        configureCalendar()
+
     }
 
+    func configureCalendar() {
+        let selectedMonth = Date()
+        let calendarModel = viewModel.makeCalendarModel(for: selectedMonth)
+        
+        
+        calendarView.configure(
+            month: calendarModel.monthTitle,
+            year: calendarModel.yearTitle,
+            days: calendarModel.days
+        )
+        
+        updateCalendarHeight(for: calendarModel.days)
+    }
+    
     //MARK: - Setup views
     func setupView() {
+        
         view.backgroundColor = .systemBackground
-        calendarView.configure(month: "March", year: "2026")
+       
         statsView.configure(completedDays: 20, bestStreak: 5)
         view.addSubview(statsView)
         view.addSubview(calendarView)
@@ -122,7 +142,7 @@ final class HabitDetailsViewController: UIViewController {
         descriptionContainerView.addSubview(descriptionTextLabel)
     }
 
-    func setupConstrainsts() {
+    func setupConstraints() {
 
         closeButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(12)
@@ -159,7 +179,7 @@ final class HabitDetailsViewController: UIViewController {
         calendarView.snp.makeConstraints { make in
             make.top.equalTo(habitHeaderView.snp.bottom).offset(24)
             make.leading.trailing.equalToSuperview().inset(32)
-            make.height.equalTo(280)
+            calendarHeightConstraint = make.height.equalTo(280).constraint
         }
 
         statsView.snp.makeConstraints { make in
@@ -201,5 +221,33 @@ final class HabitDetailsViewController: UIViewController {
         }
 
         return UIColor(hex: hex)
+    }
+    
+    private func updateCalendarHeight(for days: [HabitDetailsCalendarDayCellModel]) {
+        let rows = ceil(Double(days.count) / 7.0)
+        
+        let cellHeight: CGFloat = 28
+        let lineSpacing: CGFloat = 8
+        let headerHeight: CGFloat = 24
+        let yearHeight: CGFloat = 17
+        let topInset: CGFloat = 16
+        let headerToYearSpacing: CGFloat = 2
+        let yearToGridSpacing: CGFloat = 16
+        let bottomInset: CGFloat = 16
+        
+        let gridHeight = CGFloat(rows) * cellHeight + CGFloat(rows - 1) * lineSpacing
+        
+        let totalHeight =
+            topInset +
+            headerHeight +
+            headerToYearSpacing +
+            yearHeight +
+            yearToGridSpacing +
+            gridHeight +
+            bottomInset
+        
+        calendarHeightConstraint?.update(offset: totalHeight)
+        
+        
     }
 }

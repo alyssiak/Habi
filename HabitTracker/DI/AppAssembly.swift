@@ -13,7 +13,20 @@ final class AppAssembly {
         let quoteService = QuoteService()
         let repository = HabitRepository(context: coreDataService.context)
         let viewModel = HabitTrackerViewModel(repository: repository, quoteService: quoteService)
-        let viewController = HabitTrackerViewController(viewModel: viewModel)
+        let viewController = HabitTrackerViewController(
+            viewModel: viewModel,
+            makeDetailsViewController: { habitModel in
+                let detailViewModel = HabitDetailsViewModel(
+                    habitId: habitModel.id,
+                    repository: repository
+                )
+                
+                return HabitDetailsViewController(
+                    habit: habitModel,
+                    viewModel: detailViewModel
+                )
+            }
+        )
         
         return viewController
     }

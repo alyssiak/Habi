@@ -30,14 +30,15 @@ final class HabitTrackerViewController: UIViewController {
     private let undoBannerStackView = UIStackView()
     private let undoMessageLabel = UILabel()
     private let undoButton = UIButton(type: .system)
-
+    
     // MARK: - State
 
     private var habitModels: [HabitCardModel] = []
     private let viewModel: HabitTrackerViewModel
     private var archivedHabitStack: [ArchivedHabitUndoItem] = []
     private var hideUndoBannerWorkItem: DispatchWorkItem?
-
+    private let makeDetailsViewController: (HabitCardModel) -> UIViewController
+    
     // MARK: - Layout
 
     private enum Layout {
@@ -62,8 +63,9 @@ final class HabitTrackerViewController: UIViewController {
 
     // MARK: - Init
 
-    init(viewModel: HabitTrackerViewModel) {
+    init(viewModel: HabitTrackerViewModel, makeDetailsViewController: @escaping (HabitCardModel) -> UIViewController) {
         self.viewModel = viewModel
+        self.makeDetailsViewController = makeDetailsViewController
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -556,7 +558,7 @@ extension HabitTrackerViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let model = habitModels[indexPath.section]
-        let detailsViewController = HabitDetailsViewController(habit: model)
+        let detailsViewController = makeDetailsViewController(model)
         
         present(detailsViewController, animated: true)
     }
