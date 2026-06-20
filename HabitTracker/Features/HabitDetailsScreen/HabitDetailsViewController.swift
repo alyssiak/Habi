@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import Combine
 
 final class HabitDetailsViewController: UIViewController {
     private let screenTitleLabel = UILabel()
@@ -22,6 +23,7 @@ final class HabitDetailsViewController: UIViewController {
     private let descriptionTextLabel = UILabel()
     private let descriptionContainerView = UIView()
     private var calendarHeightConstraint: Constraint?
+    private var cancellables = Set<AnyCancellable>()
     
     private let habit: HabitCardModel
     private let calendarView = HabitDetailsCalendarView()
@@ -46,22 +48,30 @@ final class HabitDetailsViewController: UIViewController {
         setupNavigation()
         setupDescription()
         setupConstraints()
-        configureCalendar()
+        bindViewModel()
+        bindCalendarView()
+        viewModel.loadCalendar()
 
     }
+    
+    func bindCalendarView() {
+        calendarView.onDaySelected = { [weak self] date in
+            self?.viewModel.toggleDay(date)
+        }
+    }
 
-    func configureCalendar() {
-        let selectedMonth = Date()
-        let calendarModel = viewModel.makeCalendarModel(for: selectedMonth)
-        
-        
-        calendarView.configure(
-            month: calendarModel.monthTitle,
-            year: calendarModel.yearTitle,
-            days: calendarModel.days
-        )
-        
-        updateCalendarHeight(for: calendarModel.days)
+    private func bindViewModel() {
+        viewModel.$calendarModel
+            .compactMap { $0 }
+            .sink { [weak self] model in
+                self?.calendarView.configure(
+                    month: model.monthTitle,
+                    year: model.yearTitle,
+                    days: model.days
+                )
+                self?.updateCalendarHeight(for: model.days)
+            }
+            .store(in: &cancellables)
     }
     
     //MARK: - Setup views

@@ -7,8 +7,10 @@
 
 import Foundation
 import CoreData
+import Combine
 
 protocol HabitRepositoryProtocol {
+    var changesPublisher: AnyPublisher<Void, Never> { get }
     func fetchHabits() -> [Habit]
     func addHabit(title: String, emoji: String?, colorHex: String?)
     func updateHabit(_ habit: Habit, title: String, emoji: String?, colorHex: String?)
@@ -19,19 +21,33 @@ protocol HabitRepositoryProtocol {
     func toggleHabitRecord(_ habit: Habit, date: Date)
     func fetchRecords(for habit: Habit) -> [HabitRecord]
     func isHabitCompleted(_ habit: Habit, on date: Date) -> Bool
+    
+    func fetchRecords(for habitId: NSManagedObjectID) -> [HabitRecord]
+    func toggleHabitRecord(for habitId: NSManagedObjectID, date: Date)
 }
 
 
 final class HabitRepository: HabitRepositoryProtocol {
     private let context: NSManagedObjectContext
-
+    private let changesSubject = PassthroughSubject<Void, Never>()
+    
+    var changesPublisher: AnyPublisher<Void, Never> {
+        changesSubject.eraseToAnyPublisher()
+    }
+    
     init(context: NSManagedObjectContext) {
         self.context = context
     }
-
-    // CRUD
-
-    //read
+    
+    private func save() {
+        do {
+            try context.save()
+            changesSubject.send()
+        } catch {
+            print(error)
+        }
+    }
+    
     func fetchHabits() -> [Habit] {
         let request: NSFetchRequest<Habit> = Habit.fetchRequest()
         request.predicate = NSPredicate(format: "isArchived == NO OR isArchived == nil")
@@ -92,14 +108,6 @@ final class HabitRepository: HabitRepositoryProtocol {
             print(error)
         }
 
-    }
-
-    private func save() {
-        do {
-            try context.save()
-        } catch {
-            print(error)
-        }
     }
 
     //MARK: - HabitRecord
@@ -180,6 +188,31 @@ final class HabitRepository: HabitRepositoryProtocol {
         } catch {
             print(error)
             return false
+        }
+    }
+    
+    func fetchRecords(for habitId: NSManagedObjectID) -> [HabitRecord] {
+        do {
+            guard let habit = try context.existingObject(with: habitId) as? Habit else {
+                return []
+            }
+            
+            return fetchRecords(for: habit)
+        } catch {
+            print(error)
+            return []
+        }
+    }
+    
+    func toggleHabitRecord(for habitId: NSManagedObjectID, date: Date) {
+        do {
+            guard let habit = try context.existingObject(with: habitId) as? Habit else {
+                return
+            }
+            
+            toggleHabitRecord(habit, date: date)
+        } catch {
+            print(error)
         }
     }
 }

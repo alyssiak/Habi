@@ -12,6 +12,7 @@ import Combine
 final class HabitTrackerViewModel {
     private let repository: HabitRepositoryProtocol
     private let quoteService: QuoteServiceProtocol
+    private var cancellables = Set<AnyCancellable>()
     
     private(set) var habits: [Habit] = []
     @Published private(set) var quote: Quote?
@@ -22,6 +23,12 @@ final class HabitTrackerViewModel {
     init(repository: HabitRepositoryProtocol, quoteService: QuoteServiceProtocol) {
         self.repository = repository
         self.quoteService = quoteService
+        
+        repository.changesPublisher
+            .sink { [weak self] in
+                self?.loadHabits()
+            }
+            .store(in: &cancellables)
     }
 
     //MARK: - Public Methods

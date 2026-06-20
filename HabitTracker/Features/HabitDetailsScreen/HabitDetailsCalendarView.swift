@@ -17,6 +17,7 @@ final class HabitDetailsCalendarView: UIView {
 
     private let collectionView: UICollectionView
     private var days: [HabitDetailsCalendarDayCellModel] = []
+    var onDaySelected: ((Date) -> Void)?
     
     override init(frame: CGRect) {
         let layout = UICollectionViewFlowLayout()
@@ -127,5 +128,13 @@ extension HabitDetailsCalendarView: UICollectionViewDelegateFlowLayout {
         let cellWidth = floor(avaliableWidth / columns)
         
         return CGSize(width: cellWidth, height: 28)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let date = days[indexPath.item].date else {
+            return
+        }
+        
+        onDaySelected?(date)
     }
 }

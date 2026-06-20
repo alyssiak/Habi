@@ -8,6 +8,7 @@ import UIKit
 import SnapKit
 
 struct HabitDetailsCalendarDayCellModel {
+    let date: Date?
     let dayNumber: Int?
     let state: HabitCalendarDayState?
 }
