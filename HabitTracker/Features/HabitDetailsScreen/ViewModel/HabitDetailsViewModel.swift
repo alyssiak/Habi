@@ -42,6 +42,29 @@ final class HabitDetailsViewModel {
         repository.toggleHabitRecord(for: habitId, date: date)
     }
     
+    func showPreviousMonth() {
+        changeMonth(by: -1)
+    }
+    
+    func showNextMonth() {
+        changeMonth(by: 1)
+    }
+    
+    private func changeMonth(by value: Int) {
+        let calendar = Calendar.current
+        
+        guard let newMonth = calendar.date(
+            byAdding: .month,
+            value: value,
+            to: selectedMonth
+        ) else {
+            return
+        }
+        
+        selectedMonth = newMonth
+        loadCalendar()
+    }
+    
     private func makeCalendarModel(for selectedMonth: Date) -> HabitDetailsCalendarModel {
         let monthTitle = makeMonthTitle(from: selectedMonth)
         let yearTitle = makeYearTitle(from: selectedMonth)

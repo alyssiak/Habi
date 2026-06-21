@@ -14,10 +14,12 @@ final class HabitDetailsCalendarView: UIView {
     private let nextMonthButton = UIButton()
     private let monthLabel = UILabel()
     private let yearLabel = UILabel()
-
     private let collectionView: UICollectionView
     private var days: [HabitDetailsCalendarDayCellModel] = []
+    
     var onDaySelected: ((Date) -> Void)?
+    var onPreviousMonthTap: (() -> Void)?
+    var onNextMonthTap: (() -> Void)?
     
     override init(frame: CGRect) {
         let layout = UICollectionViewFlowLayout()
@@ -64,7 +66,10 @@ private extension HabitDetailsCalendarView {
 
     func setupHeader() {
         previousMonthButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        previousMonthButton.addTarget(self, action: #selector(didTapPreviousMonth), for: .touchUpInside)
+        
         nextMonthButton.setImage(UIImage(systemName: "chevron.right"), for: .normal)
+        nextMonthButton.addTarget(self, action: #selector(didTapNextMonth), for: .touchUpInside)
 
         monthLabel.font = UIFont(name: "Montserrat-SemiBold", size: 18)
         monthLabel.textColor = .label
@@ -101,6 +106,16 @@ private extension HabitDetailsCalendarView {
             make.leading.trailing.equalToSuperview().inset(16)
             make.bottom.equalToSuperview().inset(16)
         }
+    }
+    
+    //MARK: - Actions
+    
+    @objc private func didTapPreviousMonth() {
+        onPreviousMonthTap?()
+    }
+    
+    @objc private func didTapNextMonth() {
+        onNextMonthTap?()
     }
 }
 

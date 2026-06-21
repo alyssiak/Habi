@@ -58,6 +58,14 @@ final class HabitDetailsViewController: UIViewController {
         calendarView.onDaySelected = { [weak self] date in
             self?.viewModel.toggleDay(date)
         }
+        
+        calendarView.onPreviousMonthTap = { [weak self] in
+            self?.viewModel.showPreviousMonth()
+        }
+        
+        calendarView.onNextMonthTap = { [weak self] in
+            self?.viewModel.showNextMonth()
+        }
     }
 
     private func bindViewModel() {
