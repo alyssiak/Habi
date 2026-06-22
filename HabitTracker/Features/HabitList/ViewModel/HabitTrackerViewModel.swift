@@ -43,17 +43,17 @@ final class HabitTrackerViewModel {
         onHabitsChanged?(models)
     }
 
-    func addHabit(title: String, emoji: String?, colorHex: String?) {
-        repository.addHabit(title: title, emoji: emoji, colorHex: colorHex)
+    func addHabit(title: String, emoji: String?, colorHex: String?, descriptionText: String?) {
+        repository.addHabit(title: title, emoji: emoji, colorHex: colorHex, descriptionText: descriptionText)
         loadHabits()
     }
 
-    func updateHabit(for habitId: NSManagedObjectID, title: String, emoji: String?, colorHex: String?) {
+    func updateHabit(for habitId: NSManagedObjectID, title: String, emoji: String?, colorHex: String?, descriptionText: String?) {
         guard let habit = habits.first(where: {$0.objectID == habitId}) else {
             return
         }
 
-        repository.updateHabit(habit, title: title, emoji: emoji, colorHex: colorHex)
+        repository.updateHabit(habit, title: title, emoji: emoji, colorHex: colorHex, descriptionText: descriptionText)
         loadHabits()
     }
 
@@ -120,6 +120,7 @@ final class HabitTrackerViewModel {
             id: habit.objectID,
             emoji: habit.emoji ?? "",
             colorHex: habit.colorHex ?? "",
+            descriptionText: habit.descriptionText ?? "",
             title: habit.title ?? "",
             isDoneToday: isDoneToday(records: recordsArray),
             days: days,

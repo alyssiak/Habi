@@ -11,6 +11,7 @@ struct HabitFormModel {
     let title: String
     let emoji: String?
     let colorHex: String?
+    let descriptionText: String?
 }
 
 extension HabitFormModel {
@@ -19,5 +20,6 @@ extension HabitFormModel {
         self.title = cardModel.title
         self.emoji = cardModel.emoji
         self.colorHex = cardModel.colorHex
+        self.descriptionText = cardModel.descriptionText
     }
 }

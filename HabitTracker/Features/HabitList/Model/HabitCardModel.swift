@@ -12,6 +12,7 @@ struct HabitCardModel {
     let id: NSManagedObjectID
     let emoji: String?
     let colorHex: String?
+    let descriptionText: String?
     let title: String
     let isDoneToday: Bool
     let days: [HabitCalendarDay]

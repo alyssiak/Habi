@@ -15,6 +15,9 @@ final class AddHabitView: UIView {
     var colorCollectionView: UICollectionView
     var saveButton = UIButton()
     let titleErrorLabel = UILabel()
+    let descriptionTitleLabel = UILabel()
+    let descriptionTextView = UITextView()
+    let descriptionPlaceholderLabel = UILabel()
     
     //MARK: - Init
     override init(frame: CGRect) {
@@ -64,6 +67,25 @@ final class AddHabitView: UIView {
         titleErrorLabel.font = UIFont(name: "Montserrat-Medium", size: 12)
         titleErrorLabel.isHidden = true
         
+        descriptionTitleLabel.text = "Description"
+        descriptionTitleLabel.font = UIFont(name: "Montserrat-Medium", size: 14)
+        descriptionTitleLabel.textColor = .secondaryLabel
+        
+        descriptionTextView.font = UIFont(name: "Montserrat-Regular", size: 16)
+        descriptionTextView.textColor = .label
+        descriptionTextView.backgroundColor = .secondarySystemBackground
+        descriptionTextView.layer.cornerRadius = 8
+        descriptionTextView.textContainerInset = UIEdgeInsets(
+            top: 10,
+            left: 8,
+            bottom: 10,
+            right: 8
+        )
+        
+        descriptionPlaceholderLabel.text = "Add a short note"
+        descriptionPlaceholderLabel.font = UIFont(name: "Montserrat-Regular", size: 16)
+        descriptionPlaceholderLabel.textColor = .tertiaryLabel
+        
         saveButton.setTitle("Save", for: .normal)
         saveButton.setTitleColor(.white, for: .normal)
         saveButton.backgroundColor = .systemBlue
@@ -76,6 +98,9 @@ final class AddHabitView: UIView {
         addSubview(colorCollectionView)
         addSubview(titleTextField)
         addSubview(titleErrorLabel)
+        addSubview(descriptionTitleLabel)
+        addSubview(descriptionTextView)
+        descriptionTextView.addSubview(descriptionPlaceholderLabel)
         addSubview(saveButton)
     }
     
@@ -97,8 +122,25 @@ final class AddHabitView: UIView {
             make.leading.trailing.equalTo(titleTextField)
         }
         
+        descriptionTitleLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleErrorLabel.snp.bottom).offset(12)
+            make.leading.trailing.equalToSuperview().inset(16)
+        }
+        
+        descriptionTextView.snp.makeConstraints { make in
+            make.top.equalTo(descriptionTitleLabel.snp.bottom).offset(6)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.height.equalTo(96)
+        }
+        
+        descriptionPlaceholderLabel.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(10)
+            make.leading.equalToSuperview().offset(12)
+            make.trailing.lessThanOrEqualToSuperview().inset(12)
+        }
+        
         colorCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(titleErrorLabel.snp.bottom).offset(20)
+            make.top.equalTo(descriptionTextView.snp.bottom).offset(20)
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(50)
         }

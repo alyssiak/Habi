@@ -12,8 +12,8 @@ import Combine
 protocol HabitRepositoryProtocol {
     var changesPublisher: AnyPublisher<Void, Never> { get }
     func fetchHabits() -> [Habit]
-    func addHabit(title: String, emoji: String?, colorHex: String?)
-    func updateHabit(_ habit: Habit, title: String, emoji: String?, colorHex: String?)
+    func addHabit(title: String, emoji: String?, colorHex: String?, descriptionText: String?)
+    func updateHabit(_ habit: Habit, title: String, emoji: String?, colorHex: String?, descriptionText: String?)
     func deleteHabit(_ habit: Habit)
     func restoreHabit(for habitId: NSManagedObjectID)
     func toggleToday(for habitId: NSManagedObjectID)
@@ -61,21 +61,23 @@ final class HabitRepository: HabitRepositoryProtocol {
         }
     }
 
-    func addHabit(title: String, emoji: String?, colorHex: String?) {
+    func addHabit(title: String, emoji: String?, colorHex: String?, descriptionText: String?) {
         let habit = Habit(context: context)
         habit.id = UUID()
         habit.title = title
         habit.emoji = emoji ?? " "
         habit.colorHex = colorHex ?? "#FFFFFF"
+        habit.descriptionText = descriptionText ?? ""
         habit.createdAt = Date()
         habit.isArchived = false
         save()
     }
 
-    func updateHabit(_ habit: Habit, title: String, emoji: String?, colorHex: String?) {
+    func updateHabit(_ habit: Habit, title: String, emoji: String?, colorHex: String?, descriptionText: String?) {
         habit.title = title
         habit.emoji = emoji ?? " "
         habit.colorHex = colorHex ?? "#FFFFFF"
+        habit.descriptionText = descriptionText ?? ""
         save()
     }
 

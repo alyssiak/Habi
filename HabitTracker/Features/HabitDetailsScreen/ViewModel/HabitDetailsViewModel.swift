@@ -43,6 +43,7 @@ final class HabitDetailsViewModel {
         viewState = HabitDetailsViewState(
             header: makeHeaderModel(from: habit),
             form: makeFormModel(from: habit),
+            description: makeDescriptionModel(from: habit),
             calendar: makeCalendarModel(for: selectedMonth,  records: records),
             stats: makeStatsModel(records: records)
         )
@@ -197,8 +198,20 @@ final class HabitDetailsViewModel {
             id: habit.objectID,
             title: habit.title ?? "",
             emoji: habit.emoji ?? "",
-            colorHex: habit.colorHex ?? ""
+            colorHex: habit.colorHex ?? "",
+            descriptionText: habit.descriptionText ?? ""
         )
+    }
+    
+    private func makeDescriptionModel(from habit: Habit) -> HabitDetailsDescriptionModel {
+        let text = habit.descriptionText?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let text, !text.isEmpty {
+            return HabitDetailsDescriptionModel(text: text)
+        }
+
+        return HabitDetailsDescriptionModel(text: "No description yet")
     }
 }
 

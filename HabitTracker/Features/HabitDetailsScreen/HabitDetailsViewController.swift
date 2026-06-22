@@ -99,6 +99,7 @@ final class HabitDetailsViewController: UIViewController {
                 self?.currentFormModel = model.form
                 self?.configureHeader(model.header)
                 self?.configureCurrentStreak(model.stats.currentStreak)
+                self?.configureDescription(model.description)
                 self?.updateCalendarHeight(for: model.calendar.days)
             }
             .store(in: &cancellables)
@@ -181,8 +182,7 @@ final class HabitDetailsViewController: UIViewController {
         descriptionContainerView.backgroundColor = .appGray
         descriptionContainerView.layer.cornerRadius = 8
 
-        descriptionTextLabel.text = "No description yet"
-        descriptionTextLabel.font = UIFont(name: "Montserrat-Medium", size: 18)
+        descriptionTextLabel.font = UIFont(name: "Montserrat-Regular", size: 14)
         descriptionTextLabel.textColor = .secondaryLabel
         descriptionTextLabel.numberOfLines = 0
 
@@ -255,6 +255,7 @@ final class HabitDetailsViewController: UIViewController {
 
         descriptionTextLabel.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview().inset(12)
+            make.bottom.lessThanOrEqualToSuperview().inset(12)
         }
     }
 
@@ -322,7 +323,16 @@ final class HabitDetailsViewController: UIViewController {
             bottomInset
         
         calendarHeightConstraint?.update(offset: totalHeight)
+    }
+    
+    private func configureDescription(_ model: HabitDetailsDescriptionModel) {
+        let isPlaceholder = model.text == "No description yet"
         
-        
+        descriptionTextLabel.text = model.text
+        descriptionTextLabel.font = UIFont(
+            name: isPlaceholder ? "Montserrat-Medium" : "Montserrat-Regular",
+            size: 14
+        )
+        descriptionTextLabel.textColor = isPlaceholder ? .tertiaryLabel : .secondaryLabel
     }
 }

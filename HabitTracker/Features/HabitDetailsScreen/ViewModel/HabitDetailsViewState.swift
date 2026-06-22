@@ -23,9 +23,14 @@ struct HabitDetailsStatsModel {
     let currentStreak: Int
 }
 
+struct HabitDetailsDescriptionModel {
+    let text: String
+}
+
 struct HabitDetailsViewState {
     let header: HabitDetailsHeaderModel
     let form: HabitFormModel
+    let description: HabitDetailsDescriptionModel
     let calendar: HabitDetailsCalendarModel
     let stats: HabitDetailsStatsModel
 }

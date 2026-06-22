@@ -58,6 +58,7 @@ private extension AddHabitViewController {
     func setupCollections() {
         addHabitView.emojiCollectionView.delegate = self
         addHabitView.colorCollectionView.delegate = self
+        addHabitView.descriptionTextView.delegate = self
 
         addHabitView.emojiCollectionView.dataSource = self
         addHabitView.colorCollectionView.dataSource = self
@@ -82,16 +83,19 @@ private extension AddHabitViewController {
             case .add:
                 selectedColor = colorList.first?.hex
                 selectedEmoji = emojiList.first
+                addHabitView.descriptionTextView.text = nil
                 addHabitView.saveButton.setTitle("Save", for: .normal)
             case .edit(let model):
                 selectedColor = model.colorHex
                 selectedEmoji = model.emoji
                 addHabitView.titleTextField.text = model.title
+                addHabitView.descriptionTextView.text = model.descriptionText
                 addHabitView.saveButton.setTitle("Update", for: .normal)
         }
         
         addHabitView.emojiCollectionView.reloadData()
         addHabitView.colorCollectionView.reloadData()
+        updateDescriptionPlaceholder()
     }
 }
 // MARK: - Actions
@@ -105,19 +109,26 @@ private extension AddHabitViewController {
             return
         }
 
+        let descriptionText = addHabitView.descriptionTextView.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedDescription = descriptionText.isEmpty ? nil : descriptionText
+        
         switch mode {
             case .add:
                 viewModel.addHabit(
                     title: title,
                     emoji: selectedEmoji,
-                    colorHex: selectedColor
+                    colorHex: selectedColor,
+                    descriptionText: normalizedDescription
+
                 )
             case .edit(let model):
                 viewModel.updateHabit(
                     for: model.id,
                     title: title,
                     emoji: selectedEmoji,
-                    colorHex: selectedColor
+                    colorHex: selectedColor,
+                    descriptionText: normalizedDescription
+
                 )
         }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -144,6 +155,21 @@ private extension AddHabitViewController {
         addHabitView.titleErrorLabel.isHidden = true
         addHabitView.titleTextField.layer.borderWidth = 0
         addHabitView.titleTextField.layer.borderColor = nil
+    }
+}
+
+// MARK: - Text View
+
+extension AddHabitViewController: UITextViewDelegate {
+    func textViewDidChange(_ textView: UITextView) {
+        updateDescriptionPlaceholder()
+    }
+}
+
+private extension AddHabitViewController {
+    func updateDescriptionPlaceholder() {
+        let text = addHabitView.descriptionTextView.text ?? ""
+        addHabitView.descriptionPlaceholderLabel.isHidden = !text.isEmpty
     }
 }
 
