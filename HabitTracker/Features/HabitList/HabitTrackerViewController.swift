@@ -38,7 +38,7 @@ final class HabitTrackerViewController: UIViewController {
     private var archivedHabitStack: [ArchivedHabitUndoItem] = []
     private var hideUndoBannerWorkItem: DispatchWorkItem?
     private let makeDetailsViewController: (HabitCardModel) -> UIViewController
-    
+    private let makeHabitFormViewController: (AddHabitViewController.Mode) -> UIViewController
     // MARK: - Layout
 
     private enum Layout {
@@ -63,9 +63,14 @@ final class HabitTrackerViewController: UIViewController {
 
     // MARK: - Init
 
-    init(viewModel: HabitTrackerViewModel, makeDetailsViewController: @escaping (HabitCardModel) -> UIViewController) {
+    init(
+        viewModel: HabitTrackerViewModel,
+        makeDetailsViewController: @escaping (HabitCardModel) -> UIViewController,
+        makeHabitFormViewController: @escaping (AddHabitViewController.Mode) -> UIViewController
+    ) {
         self.viewModel = viewModel
         self.makeDetailsViewController = makeDetailsViewController
+        self.makeHabitFormViewController = makeHabitFormViewController
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -306,22 +311,12 @@ private extension HabitTrackerViewController {
 private extension HabitTrackerViewController {
 
     @objc func didTapAddButton() {
-        let addHabitViewController = AddHabitViewController(viewModel: viewModel)
-        addHabitViewController.onHabitSaved = { [weak self] in
-            self?.viewModel.loadHabits()
-        }
+        let addHabitViewController = makeHabitFormViewController(.add)
         present(addHabitViewController, animated: true)
     }
 
     func openEditHabit(model: HabitCardModel) {
-        let addHabitViewController = AddHabitViewController(
-            viewModel: viewModel,
-            mode: .edit(model)
-        )
-
-        addHabitViewController.onHabitSaved = { [weak self] in
-            self?.viewModel.loadHabits()
-        }
+        let addHabitViewController = makeHabitFormViewController(.edit(HabitFormModel(cardModel: model)))
 
         present(addHabitViewController, animated: true)
     }

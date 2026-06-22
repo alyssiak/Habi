@@ -9,11 +9,13 @@ import UIKit
 import SnapKit
 
 final class AddHabitView: UIView {
+    //MARK: - Properties
     var titleTextField = UITextField()
     var emojiCollectionView: UICollectionView
     var colorCollectionView: UICollectionView
     var saveButton = UIButton()
     
+    //MARK: - Init
     override init(frame: CGRect) {
         let emojiLayout = UICollectionViewFlowLayout()
         emojiLayout.scrollDirection = .horizontal
@@ -41,6 +43,7 @@ final class AddHabitView: UIView {
        fatalError("init(coder:) has not been implemented")
     }
     
+    //MARK: - Private Methods
     private func setupView() {
         emojiCollectionView.backgroundColor = .clear
         colorCollectionView.backgroundColor = .clear

@@ -35,12 +35,19 @@ final class HabitDetailsViewController: UIViewController {
     private let statsView = HabitDetailsStatsView()
     
     private let habit: HabitCardModel
+    private var currentFormModel: HabitFormModel?
     private let viewModel: HabitDetailsViewModel
-
+    private let makeHabitFormViewController: (AddHabitViewController.Mode) -> UIViewController
+    
     //MARK: - Init
-    init(habit: HabitCardModel, viewModel: HabitDetailsViewModel) {
+    init(
+        habit: HabitCardModel,
+        viewModel: HabitDetailsViewModel,
+        makeHabitFormViewController: @escaping (AddHabitViewController.Mode) -> UIViewController
+    ) {
         self.habit = habit
         self.viewModel = viewModel
+        self.makeHabitFormViewController = makeHabitFormViewController
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -89,6 +96,8 @@ final class HabitDetailsViewController: UIViewController {
                     completedDays: model.stats.completedDays,
                     bestStreak: model.stats.bestStreak
                 )
+                self?.currentFormModel = model.form
+                self?.configureHeader(model.header)
                 self?.configureCurrentStreak(model.stats.currentStreak)
                 self?.updateCalendarHeight(for: model.calendar.days)
             }
@@ -97,9 +106,7 @@ final class HabitDetailsViewController: UIViewController {
     
     //MARK: - Setup views
     func setupView() {
-        
         view.backgroundColor = .systemBackground
-       
         statsView.configure(completedDays: 20, bestStreak: 5)
         view.addSubview(statsView)
         view.addSubview(calendarView)
@@ -135,10 +142,8 @@ final class HabitDetailsViewController: UIViewController {
         habitHeaderView.backgroundColor = makeColor(from: habit.colorHex)
         habitHeaderView.layer.cornerRadius = 8
 
-        emojiLabel.text = habit.emoji
         emojiLabel.font = .systemFont(ofSize: 22)
 
-        titleLabel.text = habit.title
         titleLabel.textColor = .white
         titleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 18)
         titleLabel.numberOfLines = 0
@@ -260,7 +265,11 @@ final class HabitDetailsViewController: UIViewController {
     }
 
     @objc private func didTapEdit() {
-        //TODO: Open edit habit screen
+        guard let currentFormModel else {
+            return
+        }
+        let editViewController = makeHabitFormViewController(.edit(currentFormModel))
+        present(editViewController, animated: true)
     }
 
     //MARK: - Helpers
@@ -282,6 +291,12 @@ final class HabitDetailsViewController: UIViewController {
             currentStreakLabel.textColor = .secondaryLabel
             currentStreakLabel.backgroundColor = .lastDaysGray
         }
+    }
+    
+    private func configureHeader(_ model: HabitDetailsHeaderModel) {
+        titleLabel.text = model.title
+        emojiLabel.text = model.emoji
+        habitHeaderView.backgroundColor = makeColor(from: model.colorHex)
     }
     private func updateCalendarHeight(for days: [HabitDetailsCalendarDayCellModel]) {
         let rows = ceil(Double(days.count) / 7.0)

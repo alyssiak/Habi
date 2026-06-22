@@ -13,7 +13,13 @@ final class AppAssembly {
         let quoteService = QuoteService()
         let statsCalculator = HabitStatsCalculator()
         let repository = HabitRepository(context: coreDataService.context)
-        let viewModel = HabitTrackerViewModel(repository: repository, quoteService: quoteService, statsCalculator: statsCalculator)
+        
+        let viewModel = HabitTrackerViewModel(
+            repository: repository,
+            quoteService: quoteService,
+            statsCalculator: statsCalculator
+        )
+        
         let viewController = HabitTrackerViewController(
             viewModel: viewModel,
             makeDetailsViewController: { habitModel in
@@ -25,9 +31,21 @@ final class AppAssembly {
                 
                 return HabitDetailsViewController(
                     habit: habitModel,
-                    viewModel: detailViewModel
+                    viewModel: detailViewModel,
+                    makeHabitFormViewController: { mode in
+                        AddHabitViewController(
+                            viewModel: viewModel,
+                            mode: mode
+                        )
+                    }
                 )
-            }
+            },
+                    makeHabitFormViewController: { mode in
+                        AddHabitViewController(
+                                viewModel: viewModel,
+                                mode: mode
+                            )
+                    }
         )
         
         return viewController

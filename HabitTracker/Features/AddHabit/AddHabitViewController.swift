@@ -8,23 +8,34 @@
 import UIKit
 import SnapKit
 
-final class AddHabitViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
-   
+final class AddHabitViewController: UIViewController {
+
     enum Mode {
         case add
-        case edit(HabitCardModel)
+        case edit(HabitFormModel)
     }
-    
+
+    // MARK: - Data
+
     private let emojiList = ["🔥", "📚", "💧", "🏃‍♀️", "🧘‍♀️", "🎯", "🍎"]
     private let colorList = ColorPalettes.habitPalette
+
+    // MARK: - UI
+
     private let addHabitView = AddHabitView()
+
+    // MARK: - State
+
     private var selectedEmoji: String?
     private var selectedColor: String?
+
+    // MARK: - Dependencies
+
     private let viewModel: HabitTrackerViewModel
     private let mode: Mode
-    
-    var onHabitSaved: (() -> Void)?
-    
+
+    // MARK: - Init
+
     init(viewModel: HabitTrackerViewModel, mode: Mode = .add) {
         self.viewModel = viewModel
         self.mode = mode
@@ -34,21 +45,39 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
     required init?(coder: NSCoder) {
         fatalError()
     }
-    
+
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        addHabitView.emojiCollectionView.delegate = self
-        addHabitView.colorCollectionView.delegate = self
-        
-        addHabitView.emojiCollectionView.dataSource = self
-        addHabitView.colorCollectionView.dataSource = self
-        
-        addHabitView.saveButton.addTarget(self, action: #selector(didTapSave), for: .touchUpInside)
+
+        setupCollections()
+        setupActions()
         configureMode()
     }
-    
-    private func configureMode() {
+
+    override func loadView() {
+        view = addHabitView
+    }
+}
+
+// MARK: - Setup
+
+private extension AddHabitViewController {
+
+    func setupCollections() {
+        addHabitView.emojiCollectionView.delegate = self
+        addHabitView.colorCollectionView.delegate = self
+
+        addHabitView.emojiCollectionView.dataSource = self
+        addHabitView.colorCollectionView.dataSource = self
+    }
+
+    func setupActions() {
+        addHabitView.saveButton.addTarget(self, action: #selector(didTapSave), for: .touchUpInside)
+    }
+
+    func configureMode() {
         switch mode {
             case .add:
                 selectedColor = colorList.first?.hex
@@ -64,7 +93,12 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
         addHabitView.emojiCollectionView.reloadData()
         addHabitView.colorCollectionView.reloadData()
     }
-    
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension AddHabitViewController: UICollectionViewDelegate {
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView === addHabitView.emojiCollectionView {
             selectedEmoji = emojiList[indexPath.item]
@@ -75,7 +109,12 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
         
         collectionView.reloadData()
     }
-    
+}
+
+// MARK: - UICollectionViewDataSource
+
+extension AddHabitViewController: UICollectionViewDataSource {
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView === addHabitView.emojiCollectionView {
             return emojiList.count
@@ -108,14 +147,17 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
             cell.contentView.layer.borderColor = UIColor.label.cgColor
             return cell
         }
-        
-       
     }
-    
-    @objc private func didTapSave() {
+}
+
+// MARK: - Actions
+
+private extension AddHabitViewController {
+
+    @objc func didTapSave() {
         let title = addHabitView.titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         guard !title.isEmpty else { return }
-        
+
         switch mode {
             case .add:
                 viewModel.addHabit(
@@ -131,13 +173,6 @@ final class AddHabitViewController: UIViewController, UICollectionViewDelegate, 
                     colorHex: selectedColor
                 )
         }
-        
-        onHabitSaved?()
-        // закрыть экран
         dismiss(animated: true)
-    }
-    
-    override func loadView() {
-        view = addHabitView
     }
 }
