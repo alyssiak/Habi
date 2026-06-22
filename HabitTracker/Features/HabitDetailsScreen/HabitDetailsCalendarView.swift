@@ -149,7 +149,7 @@ extension HabitDetailsCalendarView: UICollectionViewDelegateFlowLayout {
         guard let date = days[indexPath.item].date else {
             return
         }
-        
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
         onDaySelected?(date)
     }
 }

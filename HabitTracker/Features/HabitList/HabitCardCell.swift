@@ -28,7 +28,6 @@ final class HabitCardCell: UITableViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        
         onDoneTapped = nil
         cardView.onDoneTapped = nil
     }

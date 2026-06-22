@@ -15,22 +15,12 @@ final class AddHabitViewController: UIViewController {
         case edit(HabitFormModel)
     }
 
-    // MARK: - Data
-
+    // MARK: - Properties
     private let emojiList = ["🔥", "📚", "💧", "🏃‍♀️", "🧘‍♀️", "🎯", "🍎"]
     private let colorList = ColorPalettes.habitPalette
-
-    // MARK: - UI
-
     private let addHabitView = AddHabitView()
-
-    // MARK: - State
-
     private var selectedEmoji: String?
     private var selectedColor: String?
-
-    // MARK: - Dependencies
-
     private let viewModel: HabitTrackerViewModel
     private let mode: Mode
 
@@ -74,7 +64,17 @@ private extension AddHabitViewController {
     }
 
     func setupActions() {
-        addHabitView.saveButton.addTarget(self, action: #selector(didTapSave), for: .touchUpInside)
+        addHabitView.saveButton.addTarget(
+            self,
+            action: #selector(didTapSave),
+            for: .touchUpInside
+        )
+        
+        addHabitView.titleTextField.addTarget(
+            self,
+            action: #selector(titleTextFieldDidChange),
+            for: .editingChanged
+        )
     }
 
     func configureMode() {
@@ -92,6 +92,69 @@ private extension AddHabitViewController {
         
         addHabitView.emojiCollectionView.reloadData()
         addHabitView.colorCollectionView.reloadData()
+    }
+}
+// MARK: - Actions
+
+private extension AddHabitViewController {
+
+    @objc func didTapSave() {
+        let title = addHabitView.titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !title.isEmpty else {
+            showTitleError()
+            return
+        }
+
+        switch mode {
+            case .add:
+                viewModel.addHabit(
+                    title: title,
+                    emoji: selectedEmoji,
+                    colorHex: selectedColor
+                )
+            case .edit(let model):
+                viewModel.updateHabit(
+                    for: model.id,
+                    title: title,
+                    emoji: selectedEmoji,
+                    colorHex: selectedColor
+                )
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        dismiss(animated: true)
+    }
+    
+    @objc func titleTextFieldDidChange() {
+        hideTitleError()
+    }
+}
+
+// MARK: - Validation
+private extension AddHabitViewController {
+    func showTitleError() {
+        addHabitView.titleErrorLabel.isHidden = false
+        addHabitView.titleTextField.layer.borderWidth = 1
+        addHabitView.titleTextField.layer.borderColor = UIColor.systemRed.cgColor
+        addHabitView.titleTextField.layer.cornerRadius = 8
+        UINotificationFeedbackGenerator().notificationOccurred(.error)
+        shake(addHabitView.titleTextField)
+    }
+    
+    func hideTitleError() {
+        addHabitView.titleErrorLabel.isHidden = true
+        addHabitView.titleTextField.layer.borderWidth = 0
+        addHabitView.titleTextField.layer.borderColor = nil
+    }
+}
+
+// MARK: - Animations
+private extension AddHabitViewController {
+    func shake(_ view: UIView) {
+        let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
+        animation.timingFunction = CAMediaTimingFunction(name: .linear)
+        animation.duration = 0.3
+        animation.values = [-8, 8, -6, 6, -3, 3, 0]
+        view.layer.add(animation, forKey: "shake")
     }
 }
 
@@ -147,32 +210,5 @@ extension AddHabitViewController: UICollectionViewDataSource {
             cell.contentView.layer.borderColor = UIColor.label.cgColor
             return cell
         }
-    }
-}
-
-// MARK: - Actions
-
-private extension AddHabitViewController {
-
-    @objc func didTapSave() {
-        let title = addHabitView.titleTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        guard !title.isEmpty else { return }
-
-        switch mode {
-            case .add:
-                viewModel.addHabit(
-                    title: title,
-                    emoji: selectedEmoji,
-                    colorHex: selectedColor
-                )
-            case .edit(let model):
-                viewModel.updateHabit(
-                    for: model.id,
-                    title: title,
-                    emoji: selectedEmoji,
-                    colorHex: selectedColor
-                )
-        }
-        dismiss(animated: true)
     }
 }

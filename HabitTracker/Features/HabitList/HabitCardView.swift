@@ -197,8 +197,17 @@ final class HabitCardView: UIView {
     
     @objc private func handleDoneButtonTap() {
         isDoneToday.toggle()
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
         updateCardState(isDone: isDoneToday)
-        updateDoneButton(isDone: isDoneToday)
+        
+        UIView.transition(
+            with: doneButton,
+            duration: 0.18,
+            options: .transitionCrossDissolve
+        ) {
+            self.updateDoneButton(isDone: self.isDoneToday)
+        }
+        
         onDoneTapped?()
     }
     

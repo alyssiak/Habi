@@ -14,6 +14,7 @@ final class AddHabitView: UIView {
     var emojiCollectionView: UICollectionView
     var colorCollectionView: UICollectionView
     var saveButton = UIButton()
+    let titleErrorLabel = UILabel()
     
     //MARK: - Init
     override init(frame: CGRect) {
@@ -58,6 +59,11 @@ final class AddHabitView: UIView {
         titleTextField.font = UIFont(name: "Montserrat-Regular", size: 18)
         titleTextField.borderStyle = .roundedRect
         
+        titleErrorLabel.text = "Enter habit name"
+        titleErrorLabel.textColor = .systemRed
+        titleErrorLabel.font = UIFont(name: "Montserrat-Medium", size: 12)
+        titleErrorLabel.isHidden = true
+        
         saveButton.setTitle("Save", for: .normal)
         saveButton.setTitleColor(.white, for: .normal)
         saveButton.backgroundColor = .systemBlue
@@ -69,6 +75,7 @@ final class AddHabitView: UIView {
         addSubview(emojiCollectionView)
         addSubview(colorCollectionView)
         addSubview(titleTextField)
+        addSubview(titleErrorLabel)
         addSubview(saveButton)
     }
     
@@ -85,8 +92,13 @@ final class AddHabitView: UIView {
             make.height.equalTo(44)
         }
         
+        titleErrorLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleTextField.snp.bottom).offset(4)
+            make.leading.trailing.equalTo(titleTextField)
+        }
+        
         colorCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(titleTextField.snp.bottom).offset(20)
+            make.top.equalTo(titleErrorLabel.snp.bottom).offset(20)
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(50)
         }
