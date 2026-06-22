@@ -15,27 +15,47 @@ struct HabitDetailsCalendarModel {
     let days: [HabitDetailsCalendarDayCellModel]
 }
 
-final class HabitDetailsViewModel {
-    @Published private(set) var calendarModel: HabitDetailsCalendarModel?
+struct HabitDetailsStatsModel {
+    let completedDays: Int
+    let bestStreak: Int
+    let currentStreak: Int
+}
 
+struct HabitDetailsViewState {
+    let calendar: HabitDetailsCalendarModel
+    let stats: HabitDetailsStatsModel
+}
+
+final class HabitDetailsViewModel {
+    //MARK: - Properties
+    @Published private(set) var viewState: HabitDetailsViewState?
+    private let statsCalculator: HabitStatsCalculating
     private let habitId: NSManagedObjectID
     private let repository: HabitRepositoryProtocol
     private var cancellables = Set<AnyCancellable>()
     private var selectedMonth = Date()
     
-    init(habitId: NSManagedObjectID, repository: HabitRepositoryProtocol) {
+    //MARK: - Init
+    init(habitId: NSManagedObjectID, repository: HabitRepositoryProtocol, statsCalculator: HabitStatsCalculating) {
         self.habitId = habitId
         self.repository = repository
+        self.statsCalculator = statsCalculator
         
         repository.changesPublisher
             .sink { [weak self] in
-                self?.loadCalendar()
+                self?.loadDetails()
             }
             .store(in: &cancellables)
     }
     
-    func loadCalendar() {
-        calendarModel = makeCalendarModel(for: selectedMonth)
+    //MARK: - Public methods
+    func loadDetails() {
+        let records = repository.fetchRecords(for: habitId)
+        
+        viewState = HabitDetailsViewState(
+            calendar: makeCalendarModel(for: selectedMonth,  records: records),
+            stats: makeStatsModel(records: records)
+        )
     }
     
     func toggleDay(_ date: Date) {
@@ -50,6 +70,7 @@ final class HabitDetailsViewModel {
         changeMonth(by: 1)
     }
     
+    //MARK: - Private methods
     private func changeMonth(by value: Int) {
         let calendar = Calendar.current
         
@@ -62,19 +83,28 @@ final class HabitDetailsViewModel {
         }
         
         selectedMonth = newMonth
-        loadCalendar()
+        loadDetails()
     }
     
-    private func makeCalendarModel(for selectedMonth: Date) -> HabitDetailsCalendarModel {
+    private func makeCalendarModel(for selectedMonth: Date, records: [HabitRecord]) -> HabitDetailsCalendarModel {
         let monthTitle = makeMonthTitle(from: selectedMonth)
         let yearTitle = makeYearTitle(from: selectedMonth)
-        let records = repository.fetchRecords(for: habitId)
         let days = makeMonthDays(for: selectedMonth, records: records)
         
         return HabitDetailsCalendarModel(
             monthTitle: monthTitle,
             yearTitle: yearTitle,
             days: days
+        )
+    }
+    
+    private func makeStatsModel(records: [HabitRecord]) -> HabitDetailsStatsModel {
+        let stats = statsCalculator.makeStats(from: records)
+       
+        return HabitDetailsStatsModel(
+            completedDays: stats.completedDays,
+            bestStreak: stats.bestStreak,
+            currentStreak: stats.currentStreak
         )
     }
     
@@ -154,5 +184,5 @@ final class HabitDetailsViewModel {
             
             return calendar.isDate(recordDate, inSameDayAs: date)
         }
-    }
+    } 
 }

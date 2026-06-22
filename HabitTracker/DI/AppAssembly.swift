@@ -11,14 +11,16 @@ final class AppAssembly {
     func buildHabitListScreen() -> UIViewController {
         let coreDataService = CoreDataService()
         let quoteService = QuoteService()
+        let statsCalculator = HabitStatsCalculator()
         let repository = HabitRepository(context: coreDataService.context)
-        let viewModel = HabitTrackerViewModel(repository: repository, quoteService: quoteService)
+        let viewModel = HabitTrackerViewModel(repository: repository, quoteService: quoteService, statsCalculator: statsCalculator)
         let viewController = HabitTrackerViewController(
             viewModel: viewModel,
             makeDetailsViewController: { habitModel in
                 let detailViewModel = HabitDetailsViewModel(
                     habitId: habitModel.id,
-                    repository: repository
+                    repository: repository,
+                    statsCalculator: statsCalculator
                 )
                 
                 return HabitDetailsViewController(

@@ -10,26 +10,34 @@ import SnapKit
 import Combine
 
 final class HabitDetailsViewController: UIViewController {
+    //MARK: - Properties
+    private let descriptionContainerView = UIView()
+    private let habitHeaderView = UIView()
+    
+    private let habitHeaderStackView = UIStackView()
+    private let nameRowStackView = UIStackView()
+    
     private let screenTitleLabel = UILabel()
     private let nameLabel = UILabel()
-    private let habitHeaderView = UIView()
-    private let habitHeaderStackView = UIStackView()
     private let emojiLabel = UILabel()
     private let titleLabel = UILabel()
-    private let closeButton = UIButton(type: .system)
-    private let editButton = UIButton(type: .system)
-
+    private let currentStreakLabel = UILabel()
     private let descriptionTitleLabel = UILabel()
     private let descriptionTextLabel = UILabel()
-    private let descriptionContainerView = UIView()
+    
+    private let closeButton = UIButton(type: .system)
+    private let editButton = UIButton(type: .system)
+    
     private var calendarHeightConstraint: Constraint?
     private var cancellables = Set<AnyCancellable>()
     
-    private let habit: HabitCardModel
     private let calendarView = HabitDetailsCalendarView()
     private let statsView = HabitDetailsStatsView()
+    
+    private let habit: HabitCardModel
     private let viewModel: HabitDetailsViewModel
 
+    //MARK: - Init
     init(habit: HabitCardModel, viewModel: HabitDetailsViewModel) {
         self.habit = habit
         self.viewModel = viewModel
@@ -50,10 +58,10 @@ final class HabitDetailsViewController: UIViewController {
         setupConstraints()
         bindViewModel()
         bindCalendarView()
-        viewModel.loadCalendar()
+        viewModel.loadDetails()
 
     }
-    
+    //MARK: - Bind
     func bindCalendarView() {
         calendarView.onDaySelected = { [weak self] date in
             self?.viewModel.toggleDay(date)
@@ -69,15 +77,20 @@ final class HabitDetailsViewController: UIViewController {
     }
 
     private func bindViewModel() {
-        viewModel.$calendarModel
+        viewModel.$viewState
             .compactMap { $0 }
             .sink { [weak self] model in
                 self?.calendarView.configure(
-                    month: model.monthTitle,
-                    year: model.yearTitle,
-                    days: model.days
+                    month: model.calendar.monthTitle,
+                    year: model.calendar.yearTitle,
+                    days: model.calendar.days
                 )
-                self?.updateCalendarHeight(for: model.days)
+                self?.statsView.configure(
+                    completedDays: model.stats.completedDays,
+                    bestStreak: model.stats.bestStreak
+                )
+                self?.configureCurrentStreak(model.stats.currentStreak)
+                self?.updateCalendarHeight(for: model.calendar.days)
             }
             .store(in: &cancellables)
     }
@@ -130,12 +143,25 @@ final class HabitDetailsViewController: UIViewController {
         titleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 18)
         titleLabel.numberOfLines = 0
 
+        currentStreakLabel.font = UIFont(name:"Montserrat-SemiBold", size: 12)
+        currentStreakLabel.textAlignment = .center
+        currentStreakLabel.layer.cornerRadius = 10
+        currentStreakLabel.clipsToBounds = true
+        
+        nameRowStackView.axis = .horizontal
+        nameRowStackView.alignment = .center
+        nameRowStackView.spacing = 8
+        nameRowStackView.distribution = .equalSpacing
+        
         habitHeaderStackView.axis = .horizontal
         habitHeaderStackView.spacing = 8
         habitHeaderStackView.alignment = .center
 
-        view.addSubview(nameLabel)
+        view.addSubview(nameRowStackView)
         view.addSubview(habitHeaderView)
+        
+        nameRowStackView.addArrangedSubview(nameLabel)
+        nameRowStackView.addArrangedSubview(currentStreakLabel)
         habitHeaderView.addSubview(habitHeaderStackView)
         habitHeaderStackView.addArrangedSubview(emojiLabel)
         habitHeaderStackView.addArrangedSubview(titleLabel)
@@ -177,14 +203,19 @@ final class HabitDetailsViewController: UIViewController {
             make.trailing.equalToSuperview().inset(20)
 
         }
-
-        nameLabel.snp.makeConstraints { make in
+        
+        currentStreakLabel.snp.makeConstraints { make in
+            make.height.equalTo(24)
+            make.width.greaterThanOrEqualTo(88)
+        }
+        
+        nameRowStackView.snp.makeConstraints { make in
             make.top.equalTo(closeButton.snp.bottom).offset(28)
             make.leading.trailing.equalToSuperview().inset(32)
         }
 
         habitHeaderView.snp.makeConstraints { make in
-            make.top.equalTo(nameLabel.snp.bottom).offset(8)
+            make.top.equalTo(nameRowStackView.snp.bottom).offset(8)
             make.leading.trailing.equalToSuperview().inset(32)
             make.height.equalTo(44)
         }
@@ -241,6 +272,17 @@ final class HabitDetailsViewController: UIViewController {
         return UIColor(hex: hex)
     }
     
+    private func configureCurrentStreak(_ streak: Int) {
+        currentStreakLabel.text = "\(streak) day streak"
+        
+        if streak >= 5 {
+            currentStreakLabel.textColor = .white
+            currentStreakLabel.backgroundColor = .appOrange
+        } else {
+            currentStreakLabel.textColor = .secondaryLabel
+            currentStreakLabel.backgroundColor = .lastDaysGray
+        }
+    }
     private func updateCalendarHeight(for days: [HabitDetailsCalendarDayCellModel]) {
         let rows = ceil(Double(days.count) / 7.0)
         

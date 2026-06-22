@@ -10,19 +10,21 @@ import CoreData
 import Combine
 
 final class HabitTrackerViewModel {
+    //MARK: - Properties
+    @Published private(set) var quote: Quote?
+    private let statsCalculator: HabitStatsCalculating
     private let repository: HabitRepositoryProtocol
     private let quoteService: QuoteServiceProtocol
     private var cancellables = Set<AnyCancellable>()
-    
     private(set) var habits: [Habit] = []
-    @Published private(set) var quote: Quote?
-    
     var onUpdate: (() -> Void)?
     var onHabitsChanged: (([HabitCardModel]) -> Void)?
 
-    init(repository: HabitRepositoryProtocol, quoteService: QuoteServiceProtocol) {
+    //MARK: - Init
+    init(repository: HabitRepositoryProtocol, quoteService: QuoteServiceProtocol, statsCalculator: HabitStatsCalculating) {
         self.repository = repository
         self.quoteService = quoteService
+        self.statsCalculator = statsCalculator
         
         repository.changesPublisher
             .sink { [weak self] in
@@ -103,9 +105,12 @@ final class HabitTrackerViewModel {
         let recordsArray = Array(records)
 
         //массив из 30 HabitCalendarDay
-        let days = buildCalendarDays(createdAt: habit.createdAt, records: recordsArray)
-
-        let streakCount = calculateStreak(from: days)
+        let days = buildCalendarDays(
+            createdAt: habit.createdAt,
+            records: recordsArray
+        )
+        let stats = statsCalculator.makeStats(from: recordsArray)
+        
         let completedDays = days.filter {
             $0.state == .completed
         }.count
@@ -118,7 +123,7 @@ final class HabitTrackerViewModel {
             title: habit.title ?? "",
             isDoneToday: isDoneToday(records: recordsArray),
             days: days,
-            streak: streakCount,
+            streak: stats.currentStreak,
             completedDays: completedDays,
             totalDays: totalDays
         )
@@ -194,27 +199,5 @@ final class HabitTrackerViewModel {
             return calendar.isDate(recordDate, inSameDayAs: date)
         }
     }
-
-    private func calculateStreak(from days: [HabitCalendarDay]) -> Int {
-        let today = Calendar.current.startOfDay(for: Date())
-
-        let pastDays = days
-            .filter { $0.date <= today }
-            .reversed()
-
-        var streak = 0
-
-        for day in pastDays {
-            if day.state == .completed {
-                streak += 1
-            } else {
-                if day.date == today && streak == 0 {
-                    continue
-                }
-                break
-            }
-        }
-
-        return streak
-    }
+    
 }

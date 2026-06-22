@@ -89,7 +89,7 @@ final class HabitCardView: UIView {
         emojiLabel.layer.cornerRadius = 0
         emojiLabel.clipsToBounds = false
         
-        streakLabel.font = UIFont(name: "Montserrat-Regular", size: 9)
+        streakLabel.font = UIFont(name: "Montserrat-SemiBold", size: 12)
         streakLabel.textColor = .systemRed
         streakLabel.numberOfLines = 1
         
@@ -131,6 +131,8 @@ final class HabitCardView: UIView {
         titleRowStackView.distribution = .fill
         titleRowStackView.addArrangedSubview(emojiLabel)
         titleRowStackView.addArrangedSubview(titleLabel)
+        titleRowStackView.addArrangedSubview(streakLabel)
+
         
         progressContainer.addSubview(progressView)
         
@@ -145,7 +147,6 @@ final class HabitCardView: UIView {
         rightStackView.axis = .vertical
         rightStackView.alignment = .trailing
         rightStackView.distribution = .fill
-        rightStackView.addArrangedSubview(streakLabel)
         rightStackView.addArrangedSubview(calendarView)
         
         contentStackView.spacing = 10
@@ -233,7 +234,7 @@ final class HabitCardView: UIView {
     
     private func updateStreak(streak: Int) {
         if streak >= 5 {
-            streakLabel.text = "🔥 \(streak) days streak"
+            streakLabel.text = "🔥 \(streak)"
             streakLabel.textColor = .systemOrange
         } else {
             streakLabel.text = " "
