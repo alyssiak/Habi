@@ -9,22 +9,6 @@ import CoreData
 import Foundation
 import Combine
 
-struct HabitDetailsCalendarModel {
-    let monthTitle: String
-    let yearTitle: String
-    let days: [HabitDetailsCalendarDayCellModel]
-}
-
-struct HabitDetailsStatsModel {
-    let completedDays: Int
-    let bestStreak: Int
-    let currentStreak: Int
-}
-
-struct HabitDetailsViewState {
-    let calendar: HabitDetailsCalendarModel
-    let stats: HabitDetailsStatsModel
-}
 
 final class HabitDetailsViewModel {
     //MARK: - Properties
@@ -50,16 +34,30 @@ final class HabitDetailsViewModel {
     
     //MARK: - Public methods
     func loadDetails() {
+        guard let habit = repository.fetchHabit(for: habitId) else {
+            return
+        }
+        
         let records = repository.fetchRecords(for: habitId)
         
         viewState = HabitDetailsViewState(
+            header: makeHeaderModel(from: habit),
+            form: makeFormModel(from: habit),
             calendar: makeCalendarModel(for: selectedMonth,  records: records),
             stats: makeStatsModel(records: records)
         )
     }
     
     func toggleDay(_ date: Date) {
-        repository.toggleHabitRecord(for: habitId, date: date)
+        let calendar = Calendar.current
+        let selectedDay = calendar.startOfDay(for: date)
+        let today = calendar.startOfDay(for: Date())
+        
+        guard selectedDay <= today else {
+            return
+        }
+        
+        repository.toggleHabitRecord(for: habitId, date: selectedDay)
     }
     
     func showPreviousMonth() {
@@ -184,5 +182,23 @@ final class HabitDetailsViewModel {
             
             return calendar.isDate(recordDate, inSameDayAs: date)
         }
-    } 
+    }
+    
+    private func makeHeaderModel(from habit: Habit) -> HabitDetailsHeaderModel {
+        HabitDetailsHeaderModel(
+            title: habit.title ?? "",
+            emoji: habit.emoji ?? "",
+            colorHex: habit.colorHex ?? ""
+        )
+    }
+    
+    private func makeFormModel(from habit: Habit) -> HabitFormModel {
+        HabitFormModel(
+            id: habit.objectID,
+            title: habit.title ?? "",
+            emoji: habit.emoji ?? "",
+            colorHex: habit.colorHex ?? ""
+        )
+    }
 }
+

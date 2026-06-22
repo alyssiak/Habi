@@ -21,7 +21,7 @@ protocol HabitRepositoryProtocol {
     func toggleHabitRecord(_ habit: Habit, date: Date)
     func fetchRecords(for habit: Habit) -> [HabitRecord]
     func isHabitCompleted(_ habit: Habit, on date: Date) -> Bool
-    
+    func fetchHabit(for habitId: NSManagedObjectID) -> Habit?
     func fetchRecords(for habitId: NSManagedObjectID) -> [HabitRecord]
     func toggleHabitRecord(for habitId: NSManagedObjectID, date: Date)
 }
@@ -109,7 +109,16 @@ final class HabitRepository: HabitRepositoryProtocol {
         }
 
     }
-
+    
+    func fetchHabit(for habitId: NSManagedObjectID) -> Habit? {
+        do {
+            return try context.existingObject(with: habitId) as? Habit
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+    
     //MARK: - HabitRecord
     func toggleHabitRecord(_ habit: Habit, date: Date) {
         let calendar = Calendar.current

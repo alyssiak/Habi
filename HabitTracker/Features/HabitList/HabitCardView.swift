@@ -233,12 +233,20 @@ final class HabitCardView: UIView {
     }
     
     private func updateStreak(streak: Int) {
+        if streak == 0 {
+                streakLabel.isHidden = true
+                return
+            }
+        
+        streakLabel.isHidden = false
+        streakLabel.text = "🔥 \(streak)"
+       
         if streak >= 5 {
-            streakLabel.text = "🔥 \(streak)"
-            streakLabel.textColor = .systemOrange
+            streakLabel.textColor = .appOrange
+            streakLabel.alpha = 1
         } else {
-            streakLabel.text = " "
-            streakLabel.textColor = .clear
+            streakLabel.textColor = .secondaryLabel
+            streakLabel.alpha = 0.4
         }
     }
 }
