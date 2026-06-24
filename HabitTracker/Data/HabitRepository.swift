@@ -11,17 +11,28 @@ import Combine
 
 protocol HabitRepositoryProtocol {
     var changesPublisher: AnyPublisher<Void, Never> { get }
+    
+    // MARK: - Habit Fetching
+    
     func fetchHabits() -> [Habit]
+    func fetchArchivedHabits() -> [Habit]
+    func fetchHabit(for habitId: NSManagedObjectID) -> Habit?
+    
+    // MARK: - Habit Mutations
+    
     func addHabit(title: String, emoji: String?, colorHex: String?, descriptionText: String?)
     func updateHabit(_ habit: Habit, title: String, emoji: String?, colorHex: String?, descriptionText: String?)
     func deleteHabit(_ habit: Habit)
     func restoreHabit(for habitId: NSManagedObjectID)
+    func permanentlyDeleteHabit(for habitId: NSManagedObjectID)
+    func permanentlyDeleteAllArchivedHabits()
+    
+    // MARK: - Habit Records
+    
     func toggleToday(for habitId: NSManagedObjectID)
-
     func toggleHabitRecord(_ habit: Habit, date: Date)
     func fetchRecords(for habit: Habit) -> [HabitRecord]
     func isHabitCompleted(_ habit: Habit, on date: Date) -> Bool
-    func fetchHabit(for habitId: NSManagedObjectID) -> Habit?
     func fetchRecords(for habitId: NSManagedObjectID) -> [HabitRecord]
     func toggleHabitRecord(for habitId: NSManagedObjectID, date: Date)
 }
@@ -39,14 +50,7 @@ final class HabitRepository: HabitRepositoryProtocol {
         self.context = context
     }
     
-    private func save() {
-        do {
-            try context.save()
-            changesSubject.send()
-        } catch {
-            print(error)
-        }
-    }
+    // MARK: - Habit Fetching
     
     func fetchHabits() -> [Habit] {
         let request: NSFetchRequest<Habit> = Habit.fetchRequest()
@@ -61,6 +65,30 @@ final class HabitRepository: HabitRepositoryProtocol {
         }
     }
 
+    func fetchArchivedHabits() -> [Habit] {
+        let request: NSFetchRequest<Habit> = Habit.fetchRequest()
+        request.predicate = NSPredicate(format: "isArchived == YES")
+        request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
+        
+        do {
+            return try context.fetch(request)
+        } catch {
+            print(error)
+            return []
+        }
+    }
+    
+    func fetchHabit(for habitId: NSManagedObjectID) -> Habit? {
+        do {
+            return try context.existingObject(with: habitId) as? Habit
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+    
+    // MARK: - Habit Mutations
+    
     func addHabit(title: String, emoji: String?, colorHex: String?, descriptionText: String?) {
         let habit = Habit(context: context)
         habit.id = UUID()
@@ -98,7 +126,32 @@ final class HabitRepository: HabitRepositoryProtocol {
             print(error)
         }
     }
+    
+    func permanentlyDeleteHabit(for habitId: NSManagedObjectID) {
+        do {
+            guard let habit = try context.existingObject(with: habitId) as? Habit else {
+                return
+            }
 
+            context.delete(habit)
+            save()
+        } catch {
+            print(error)
+        }
+    }
+
+    func permanentlyDeleteAllArchivedHabits() {
+        let habits = fetchArchivedHabits()
+
+        habits.forEach { habit in
+            context.delete(habit)
+        }
+
+        save()
+    }
+    
+    // MARK: - Habit Records
+    
     func toggleToday(for habitId: NSManagedObjectID) {
         do {
             guard let habit = try context.existingObject(with: habitId) as? Habit
@@ -109,19 +162,8 @@ final class HabitRepository: HabitRepositoryProtocol {
         } catch {
             print(error)
         }
-
     }
     
-    func fetchHabit(for habitId: NSManagedObjectID) -> Habit? {
-        do {
-            return try context.existingObject(with: habitId) as? Habit
-        } catch {
-            print(error)
-            return nil
-        }
-    }
-    
-    //MARK: - HabitRecord
     func toggleHabitRecord(_ habit: Habit, date: Date) {
         let calendar = Calendar.current
 
@@ -222,6 +264,17 @@ final class HabitRepository: HabitRepositoryProtocol {
             }
             
             toggleHabitRecord(habit, date: date)
+        } catch {
+            print(error)
+        }
+    }
+    
+    // MARK: - Private Helpers
+    
+    private func save() {
+        do {
+            try context.save()
+            changesSubject.send()
         } catch {
             print(error)
         }
