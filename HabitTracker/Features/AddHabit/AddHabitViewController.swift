@@ -65,6 +65,12 @@ private extension AddHabitViewController {
     }
 
     func setupActions() {
+        addHabitView.cancelButton.addTarget(
+            self,
+            action: #selector(didTapCancel),
+            for: .touchUpInside
+        )
+        
         addHabitView.saveButton.addTarget(
             self,
             action: #selector(didTapSave),
@@ -81,11 +87,13 @@ private extension AddHabitViewController {
     func configureMode() {
         switch mode {
             case .add:
+                addHabitView.screenTitleLabel.text = "Add Habit"
                 selectedColor = colorList.first?.hex
                 selectedEmoji = emojiList.first
                 addHabitView.descriptionTextView.text = nil
                 addHabitView.saveButton.setTitle("Save", for: .normal)
             case .edit(let model):
+                addHabitView.screenTitleLabel.text = "Edit Habit"
                 selectedColor = model.colorHex
                 selectedEmoji = model.emoji
                 addHabitView.titleTextField.text = model.title
@@ -137,6 +145,10 @@ private extension AddHabitViewController {
     
     @objc func titleTextFieldDidChange() {
         hideTitleError()
+    }
+    
+    @objc private func didTapCancel() {
+        dismiss(animated: true)
     }
 }
 
@@ -216,24 +228,56 @@ extension AddHabitViewController: UICollectionViewDataSource {
         if collectionView === addHabitView.emojiCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EmojiCollectionViewCell", for: indexPath)
             cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+            
+            let emoji = emojiList[indexPath.item]
+            let isSelected = emoji == selectedEmoji
+            
             let label = UILabel()
-            label.text = emojiList[indexPath.item]
+            label.text = emoji
             label.font = .systemFont(ofSize: 30)
             label.textAlignment = .center
+            
             cell.contentView.addSubview(label)
             label.frame = cell.contentView.bounds
+            
             cell.contentView.layer.cornerRadius = 24
-            cell.contentView.backgroundColor = emojiList[indexPath.item] == selectedEmoji ? .systemGray5 : .clear
+            cell.contentView.backgroundColor = isSelected ? .systemGray5 : .clear
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ColorCollectionViewCell", for: indexPath)
             cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+            
             let color = colorList[indexPath.item]
+            let isSelected = color.hex == selectedColor
+            
             cell.contentView.backgroundColor = color.uiColor
             cell.contentView.layer.cornerRadius = 20
             cell.contentView.layer.masksToBounds = true
-            cell.contentView.layer.borderWidth = color.hex == selectedColor ? 3 : 0
-            cell.contentView.layer.borderColor = UIColor.label.cgColor
+            cell.contentView.layer.borderWidth = 0
+            cell.contentView.layer.borderColor = nil
+            
+            if isSelected {
+                let overlayView = UIView()
+                overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.22)
+                overlayView.isUserInteractionEnabled = false
+
+                let checkmarkView = UIImageView(image: UIImage(systemName: "checkmark"))
+                checkmarkView.tintColor = .white
+                checkmarkView.contentMode = .scaleAspectFit
+                checkmarkView.isUserInteractionEnabled = false
+                
+                cell.contentView.addSubview(overlayView)
+                cell.contentView.addSubview(checkmarkView)
+
+                overlayView.snp.makeConstraints { make in
+                        make.edges.equalToSuperview()
+                }
+                
+                checkmarkView.snp.makeConstraints { make in
+                    make.center.equalToSuperview()
+                    make.width.height.equalTo(18)
+                }
+            }
             return cell
         }
     }
