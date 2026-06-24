@@ -13,13 +13,14 @@ import Combine
 final class HabitTrackerViewController: UIViewController {
 
     private var cancellables = Set<AnyCancellable>()
-    // MARK: - UI
+    // MARK: - Properties
 
     private let avatarImageView = UIImageView()
     private let greetingLabel = UILabel()
     private let quoteTextLabel = UILabel()
     private let quoteAuthorLabel = UILabel()
     private let addHabitButton = UIButton()
+    private let archiveButton = UIButton(type: .system)
     private let headerStackView = UIStackView()
     private let textStackView = UIStackView()
     private let habitsTableView = UITableView()
@@ -30,8 +31,6 @@ final class HabitTrackerViewController: UIViewController {
     private let undoBannerStackView = UIStackView()
     private let undoMessageLabel = UILabel()
     private let undoButton = UIButton(type: .system)
-    
-    // MARK: - State
 
     private var habitModels: [HabitCardModel] = []
     private let viewModel: HabitTrackerViewModel
@@ -39,6 +38,7 @@ final class HabitTrackerViewController: UIViewController {
     private var hideUndoBannerWorkItem: DispatchWorkItem?
     private let makeDetailsViewController: (HabitCardModel) -> UIViewController
     private let makeHabitFormViewController: (AddHabitViewController.Mode) -> UIViewController
+    private let makeArchiveViewController: () -> UIViewController
     // MARK: - Layout
 
     private enum Layout {
@@ -54,6 +54,7 @@ final class HabitTrackerViewController: UIViewController {
         static let undoBannerHeight: CGFloat = 52
         static let undoBannerBottomOffset: CGFloat = 12
         static let undoBannerHideDelay: TimeInterval = 10
+        static let archiveButtonSize: CGFloat = 40
     }
 
     private struct ArchivedHabitUndoItem {
@@ -66,11 +67,14 @@ final class HabitTrackerViewController: UIViewController {
     init(
         viewModel: HabitTrackerViewModel,
         makeDetailsViewController: @escaping (HabitCardModel) -> UIViewController,
-        makeHabitFormViewController: @escaping (AddHabitViewController.Mode) -> UIViewController
+        makeHabitFormViewController: @escaping (AddHabitViewController.Mode) -> UIViewController,
+        makeArchiveViewController: @escaping () -> UIViewController
     ) {
         self.viewModel = viewModel
         self.makeDetailsViewController = makeDetailsViewController
         self.makeHabitFormViewController = makeHabitFormViewController
+        self.makeArchiveViewController = makeArchiveViewController
+        
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -127,7 +131,13 @@ private extension HabitTrackerViewController {
         addHabitButton.tintColor = .white
         addHabitButton.layer.cornerRadius = 8
         addHabitButton.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
-
+        
+        archiveButton.setImage(UIImage(systemName: "archivebox"), for: .normal)
+        archiveButton.tintColor = .label
+        archiveButton.backgroundColor = .secondarySystemBackground
+        archiveButton.layer.cornerRadius = 8
+        archiveButton.addTarget(self, action: #selector(didTapArchiveButton), for: .touchUpInside)
+        
         textStackView.axis = .vertical
         textStackView.spacing = 6
         textStackView.addArrangedSubview(greetingLabel)
@@ -137,8 +147,16 @@ private extension HabitTrackerViewController {
         headerStackView.axis = .horizontal
         headerStackView.spacing = 16
         headerStackView.alignment = .center
+        
+        textStackView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        textStackView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        archiveButton.setContentHuggingPriority(.required, for: .horizontal)
+        archiveButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
         headerStackView.addArrangedSubview(avatarImageView)
         headerStackView.addArrangedSubview(textStackView)
+        headerStackView.addArrangedSubview(archiveButton)
         view.addSubview(headerStackView)
         view.addSubview(addHabitButton)
     }
@@ -232,7 +250,11 @@ private extension HabitTrackerViewController {
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(Layout.headerTopOffset)
             make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
         }
-
+        
+        archiveButton.snp.makeConstraints { make in
+            make.size.equalTo(40)
+        }
+        
         habitsTableView.snp.makeConstraints { make in
             make.top.equalTo(headerStackView.snp.bottom).offset(Layout.tableTopOffset)
             make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
@@ -249,7 +271,8 @@ private extension HabitTrackerViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Layout.addButtonBottomOffset)
             make.size.equalTo(Layout.addButtonSize)
         }
-
+        
+        
         undoBannerView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
             make.bottom.equalTo(addHabitButton.snp.top).offset(-Layout.undoBannerBottomOffset)
@@ -315,6 +338,11 @@ private extension HabitTrackerViewController {
         present(addHabitViewController, animated: true)
     }
 
+    @objc func didTapArchiveButton() {
+        let archiveViewController = makeArchiveViewController()
+        present(archiveViewController, animated: true)
+    }
+    
     func openEditHabit(model: HabitCardModel) {
         let addHabitViewController = makeHabitFormViewController(.edit(HabitFormModel(cardModel: model)))
 

@@ -40,12 +40,16 @@ final class AppAssembly {
                     }
                 )
             },
-                    makeHabitFormViewController: { mode in
-                        AddHabitViewController(
-                                viewModel: viewModel,
-                                mode: mode
-                            )
-                    }
+            makeHabitFormViewController: { mode in
+                AddHabitViewController(
+                    viewModel: viewModel,
+                    mode: mode
+                )
+            },
+            makeArchiveViewController: {
+                let archivedViewModel = ArchivedHabitsViewModel(repository: repository)
+                return ArchivedHabitsViewController(viewModel: archivedViewModel)
+            }
         )
         
         return viewController
