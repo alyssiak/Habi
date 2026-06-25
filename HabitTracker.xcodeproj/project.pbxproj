@@ -11,7 +11,18 @@
 		F6FB29ED2FB6714A00FB4E39 /* AGENTS.md in Resources */ = {isa = PBXBuildFile; fileRef = F6FB29EC2FB6714600FB4E39 /* AGENTS.md */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		F61C14032FED25B0003B597C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F664A8832FA3617600CB0B97 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F664A88A2FA3617600CB0B97;
+			remoteInfo = HabitTracker;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		F61C13FF2FED25B0003B597C /* HabitStatsCalculatorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HabitStatsCalculatorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F664A88B2FA3617600CB0B97 /* HabitTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HabitTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6FB29EC2FB6714600FB4E39 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -27,6 +38,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		F61C14002FED25B0003B597C /* HabitStatsCalculatorTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HabitStatsCalculatorTests;
+			sourceTree = "<group>";
+		};
 		F664A88D2FA3617600CB0B97 /* HabitTracker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -38,6 +54,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		F61C13FC2FED25B0003B597C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F664A8882FA3617600CB0B97 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -53,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				F6FB29EC2FB6714600FB4E39 /* AGENTS.md */,
+				F61C14002FED25B0003B597C /* HabitStatsCalculatorTests */,
 				F664A88C2FA3617600CB0B97 /* Products */,
 				F664A88D2FA3617600CB0B97 /* HabitTracker */,
 			);
@@ -62,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				F664A88B2FA3617600CB0B97 /* HabitTracker.app */,
+				F61C13FF2FED25B0003B597C /* HabitStatsCalculatorTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -69,6 +94,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		F61C13FE2FED25B0003B597C /* HabitStatsCalculatorTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F61C14052FED25B0003B597C /* Build configuration list for PBXNativeTarget "HabitStatsCalculatorTests" */;
+			buildPhases = (
+				F61C13FB2FED25B0003B597C /* Sources */,
+				F61C13FC2FED25B0003B597C /* Frameworks */,
+				F61C13FD2FED25B0003B597C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F61C14042FED25B0003B597C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F61C14002FED25B0003B597C /* HabitStatsCalculatorTests */,
+			);
+			name = HabitStatsCalculatorTests;
+			packageProductDependencies = (
+			);
+			productName = HabitStatsCalculatorTests;
+			productReference = F61C13FF2FED25B0003B597C /* HabitStatsCalculatorTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		F664A88A2FA3617600CB0B97 /* HabitTracker */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F664A8A12FA3617700CB0B97 /* Build configuration list for PBXNativeTarget "HabitTracker" */;
@@ -102,6 +150,10 @@
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					F61C13FE2FED25B0003B597C = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = F664A88A2FA3617600CB0B97;
+					};
 					F664A88A2FA3617600CB0B97 = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -125,11 +177,19 @@
 			projectRoot = "";
 			targets = (
 				F664A88A2FA3617600CB0B97 /* HabitTracker */,
+				F61C13FE2FED25B0003B597C /* HabitStatsCalculatorTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		F61C13FD2FED25B0003B597C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F664A8892FA3617600CB0B97 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -141,6 +201,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		F61C13FB2FED25B0003B597C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F664A8872FA3617600CB0B97 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -150,7 +217,51 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		F61C14042FED25B0003B597C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F664A88A2FA3617600CB0B97 /* HabitTracker */;
+			targetProxy = F61C14032FED25B0003B597C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		F61C14062FED25B0003B597C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZZS9S7F6CF;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = alyssiadev.HabitStatsCalculatorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HabitTracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HabitTracker";
+			};
+			name = Debug;
+		};
+		F61C14072FED25B0003B597C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZZS9S7F6CF;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = alyssiadev.HabitStatsCalculatorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HabitTracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HabitTracker";
+			};
+			name = Release;
+		};
 		F664A8A22FA3617700CB0B97 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -331,6 +442,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		F61C14052FED25B0003B597C /* Build configuration list for PBXNativeTarget "HabitStatsCalculatorTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F61C14062FED25B0003B597C /* Debug */,
+				F61C14072FED25B0003B597C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		F664A8862FA3617600CB0B97 /* Build configuration list for PBXProject "HabitTracker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
