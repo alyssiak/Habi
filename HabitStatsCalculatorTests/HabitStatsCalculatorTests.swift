@@ -6,30 +6,153 @@
 //
 
 import XCTest
+@testable import HabitTracker
 
 final class HabitStatsCalculatorTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    private var calculator: HabitStatsCalculator!
+    
+    // MARK: - Lifecycle
+    override func setUp() {
+        super.setUp()
+        calculator = HabitStatsCalculator()
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
+    override func tearDown() {
+        calculator = nil
+        super.tearDown()
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    
+    // MARK: - Empty State
+    func testMakeStatsReturnsZeroValuesWhenDatesAreEmpty() {
+        let today = makeDate(year: 2026, month: 6, day: 25)
+        let stats = calculator.makeStats(
+            fromCompletedDates: [],
+            today: today
+        )
+        
+        XCTAssertEqual(stats.currentStreak, 0)
+        XCTAssertEqual(stats.bestStreak, 0)
+        XCTAssertEqual(stats.completedDays, 0)
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        measure {
-            // Put the code you want to measure the time of here.
-        }
+    
+    // MARK: - Completed Days
+    func testMakeStatsCountsUniqueCompletedDays() {
+        let today = makeDate(year: 2026, month: 6, day: 25)
+        let sameDayMorning = makeDate(year: 2026, month: 6, day: 24, hour: 9)
+        let sameDayEvening = makeDate(year: 2026, month: 6, day: 24, hour: 20)
+        
+        let stats = calculator.makeStats(
+            fromCompletedDates: [sameDayMorning, sameDayEvening, today],
+            today: today
+        )
+        
+        XCTAssertEqual(stats.completedDays, 2)
     }
+    
+    // MARK: - Current Streak
+    func testMakeStatsCalculatesCurrentStreakIncludingToday() {
+        let today = makeDate(year: 2026, month: 6, day: 25)
+        let yesterday = makeDate(year: 2026, month: 6, day: 24)
+        let twoDaysAgo = makeDate(year: 2026, month: 6, day: 23)
+        
+        let stats = calculator.makeStats(
+            fromCompletedDates: [yesterday, twoDaysAgo, today],
+            today: today
+        )
+        
+        XCTAssertEqual(stats.currentStreak, 3)
+    }
+    
+    func testMakeStatsCalculatesCurrentStreakFromYesterdayWhenTodayIsNotCompleted() {
+        let today = makeDate(year: 2026, month: 6, day: 25)
+        let yesterday = makeDate(year: 2026, month: 6, day: 24)
+        let twoDaysAgo = makeDate(year: 2026, month: 6, day: 23)
+        
+        let stats = calculator.makeStats(
+            fromCompletedDates: [yesterday, twoDaysAgo],
+            today: today
+        )
+        
+        XCTAssertEqual(stats.currentStreak, 2)
+    }
+    
+    func testMakeStatsStopsCurrentStreakWhenThereIsGap() {
+        let today = makeDate(year: 2026, month: 6, day: 25)
+        let yesterday = makeDate(year: 2026, month: 6, day: 24)
+        let threeDaysAgo = makeDate(year: 2026, month: 6, day: 22)
+        
+        let stats = calculator.makeStats(
+            fromCompletedDates: [yesterday, threeDaysAgo, today],
+            today: today
+        )
+        
+        XCTAssertEqual(stats.currentStreak, 2)
+    }
+    
+    // MARK: - Best Streak
+    func testMakeStatsCalculatesBestStreak() {
+        let today = makeDate(year: 2026, month: 6, day: 25)
 
+        let june1 = makeDate(year: 2026, month: 6, day: 1)
+        let june2 = makeDate(year: 2026, month: 6, day: 2)
+        let june3 = makeDate(year: 2026, month: 6, day: 3)
+        
+        let june10 = makeDate(year: 2026, month: 6, day: 10)
+        let june11 = makeDate(year: 2026, month: 6, day: 11)
+        
+        let stats = calculator.makeStats(
+            fromCompletedDates: [
+                june1,
+                june2,
+                june3,
+                june10,
+                june11
+            ],
+            today: today
+        )
+        
+        XCTAssertEqual(stats.bestStreak, 3)
+    }
+    
+    func testMakeStatsReturnsBestStreakOneForSingleCompletedDay() {
+        let today = makeDate(year: 2026, month: 6, day: 25)
+        
+        let stats = calculator.makeStats(
+            fromCompletedDates: [today],
+            today: today
+        )
+        
+        XCTAssertEqual(stats.bestStreak, 1)
+    }
+    
+    //MARK: - Sorted dates
+    func testMakeStatsHandlesUnsortedDates() {
+        let today = makeDate(year: 2026, month: 6, day: 25)
+        
+        let june1 = makeDate(year: 2026, month: 6, day: 1)
+        let june2 = makeDate(year: 2026, month: 6, day: 2)
+        let june3 = makeDate(year: 2026, month: 6, day: 3)
+        
+        let stats = calculator.makeStats(
+            fromCompletedDates: [
+                june3,
+                june1,
+                june2
+            ],
+            today: today
+        )
+        
+        XCTAssertEqual(stats.bestStreak, 3)
+        XCTAssertEqual(stats.completedDays, 3)
+    }
+    
+    // MARK: - Helpers
+    private func makeDate(year: Int, month: Int, day: Int, hour: Int = 0) -> Date {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        components.day = day
+        components.hour = hour
+        return Calendar.current.date(from: components)!
+    }
 }
