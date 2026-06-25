@@ -21,10 +21,15 @@ protocol HabitStatsCalculating {
 struct HabitStatsCalculator: HabitStatsCalculating {
     func makeStats(from records: [HabitRecord]) -> HabitStats {
         let completedDates = completedStartOfDay(from: records)
+        return makeStats(fromCompletedDates: completedDates)
+    }
+    
+    func makeStats(fromCompletedDates dates: [Date], today: Date = Date()) -> HabitStats {
+        let completedDates = Array(Set(dates.map { Calendar.current.startOfDay(for: $0)})).sorted()
         
         return HabitStats(
             completedDays: completedDates.count,
-            currentStreak: calculateCurrentStreak(from: completedDates),
+            currentStreak: calculateCurrentStreak(from: completedDates, today: today),
             bestStreak: calculateBestStreak(from: completedDates)
         )
     }
@@ -35,18 +40,18 @@ struct HabitStatsCalculator: HabitStatsCalculating {
         let completedDates = records
             .filter { $0.isCompleted }
             .compactMap { $0.date }
-            .map { calendar.startOfDay(for: $0)}
+            .map { calendar.startOfDay(for: $0) }
         
         return Array(Set(completedDates)).sorted()
     }
     
     //MARK: - Helpers
-    private func calculateCurrentStreak(from completedDates: [Date]) -> Int {
+    private func calculateCurrentStreak(from completedDates: [Date], today: Date) -> Int {
         let calendar = Calendar.current
         let completedSet = Set(completedDates)
         
         var streak = 0
-        var date = calendar.startOfDay(for: Date())
+        var date = calendar.startOfDay(for: today)
         
         if !completedSet.contains(date),
            let yesterday = calendar.date(byAdding: .day, value: -1, to: date) {
@@ -56,11 +61,11 @@ struct HabitStatsCalculator: HabitStatsCalculating {
         while completedSet.contains(date) {
             streak += 1
             
-            guard let previuosDay = calendar.date(byAdding: .day, value: -1, to: date) else {
+            guard let previousDay = calendar.date(byAdding: .day, value: -1, to: date) else {
                 break
             }
             
-            date = previuosDay
+            date = previousDay
         }
         return streak
     }
