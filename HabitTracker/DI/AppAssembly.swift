@@ -13,11 +13,13 @@ final class AppAssembly {
         let quoteService = QuoteService()
         let statsCalculator = HabitStatsCalculator()
         let repository = HabitRepository(context: coreDataService.context)
+        let calendarBuilder = HabitCalendarBuilder()
         
         let viewModel = HabitTrackerViewModel(
             repository: repository,
             quoteService: quoteService,
-            statsCalculator: statsCalculator
+            statsCalculator: statsCalculator,
+            calendarBuilder: calendarBuilder
         )
         
         let viewController = HabitTrackerViewController(

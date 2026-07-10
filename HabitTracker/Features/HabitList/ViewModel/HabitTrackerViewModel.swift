@@ -15,16 +15,24 @@ final class HabitTrackerViewModel {
     private let statsCalculator: HabitStatsCalculating
     private let repository: HabitRepositoryProtocol
     private let quoteService: QuoteServiceProtocol
+    private let calendarBuilder: HabitCalendarBuilding
     private var cancellables = Set<AnyCancellable>()
     private(set) var habits: [Habit] = []
     var onUpdate: (() -> Void)?
     var onHabitsChanged: (([HabitCardModel]) -> Void)?
 
     //MARK: - Init
-    init(repository: HabitRepositoryProtocol, quoteService: QuoteServiceProtocol, statsCalculator: HabitStatsCalculating) {
+    init(
+        repository: HabitRepositoryProtocol,
+        quoteService: QuoteServiceProtocol,
+        statsCalculator: HabitStatsCalculating,
+        calendarBuilder: HabitCalendarBuilding
+        
+    ) {
         self.repository = repository
         self.quoteService = quoteService
         self.statsCalculator = statsCalculator
+        self.calendarBuilder = calendarBuilder
         
         repository.changesPublisher
             .sink { [weak self] in
@@ -103,102 +111,43 @@ final class HabitTrackerViewModel {
     private func mapToCardModel(habit: Habit) -> HabitCardModel {
         let records = habit.records as? Set<HabitRecord> ?? []
         let recordsArray = Array(records)
+        let today = Date()
 
-        //массив из 30 HabitCalendarDay
-        let days = buildCalendarDays(
+        let completedDates = recordsArray
+            .filter { $0.isCompleted }
+            .compactMap { $0.date }
+        
+        
+        let days = calendarBuilder.buildDays(
             createdAt: habit.createdAt,
-            records: recordsArray
+            completedDates: completedDates,
+            today: today
         )
+        
+        let isDoneToday = calendarBuilder.isCompletedToday(
+            completedDates: completedDates,
+            today: today
+        )
+        
         let stats = statsCalculator.makeStats(from: recordsArray)
         
         let completedDays = days.filter {
             $0.state == .completed
         }.count
-        let totalDays = days.count
 
+        let totalDays = days.count
+        
         return HabitCardModel(
             id: habit.objectID,
             emoji: habit.emoji ?? "",
             colorHex: habit.colorHex ?? "",
             descriptionText: habit.descriptionText ?? "",
             title: habit.title ?? "",
-            isDoneToday: isDoneToday(records: recordsArray),
+            isDoneToday: isDoneToday,
             days: days,
             streak: stats.currentStreak,
             completedDays: completedDays,
             totalDays: totalDays
         )
     }
-
-    private func isDoneToday(records: [HabitRecord]) -> Bool {
-        let calendar = Calendar.current
-        let startOfToday = calendar.startOfDay(for: Date())
-        guard let nextDay = calendar.date(byAdding: .day, value: 1, to: startOfToday) else {
-            return false
-        }
-
-        return records.contains { record in
-            guard let date = record.date else {
-                return false
-            }
-
-            return date >= startOfToday &&
-            date < nextDay &&
-            record.isCompleted
-
-        }
-    }
-
-    private func buildCalendarDays(createdAt: Date?, records: [HabitRecord]) -> [HabitCalendarDay] {
-        guard let createdAt else { return [] }
-
-        let calendar = Calendar.current
-        let startDate = calendar.startOfDay(for: createdAt)
-        let today = calendar.startOfDay(for: Date())
-
-        // считаем разницу междой датой создания привычки и текующим днем
-        let totalDaysPassed = calendar.dateComponents([.day], from: startDate, to: today).day ?? 0
-        let currentBlockIndex = totalDaysPassed / 30
-        guard let blockStartDate = calendar.date(byAdding: .day, value: currentBlockIndex * 30, to: startDate) else {
-            return []
-        }
-        var days: [HabitCalendarDay] = []
-
-        for offset in 0..<30 {
-            guard let date = calendar.date(byAdding: .day, value: offset, to: blockStartDate) else {
-                continue
-            }
-
-            let isCompleted = hasCompletedRecord(
-                on: date,
-                records: records,
-                calendar: calendar
-            )
-
-            let state: HabitCalendarDayState
-
-            if date > today {
-                state = .future
-            } else if isCompleted {
-                state = .completed
-            } else {
-                state = .missed
-            }
-
-            days.append(HabitCalendarDay(date: date, state: state))
-        }
-
-        return days
-    }
-
-    private func hasCompletedRecord(on date: Date, records: [HabitRecord], calendar: Calendar) -> Bool {
-        return records.contains { record in
-            guard let recordDate = record.date, record.isCompleted else {
-                return false
-            }
-
-            return calendar.isDate(recordDate, inSameDayAs: date)
-        }
-    }
-    
 }
