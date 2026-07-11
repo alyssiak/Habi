@@ -11,6 +11,7 @@ import XCTest
 final class HabitCalendarBuilderTests: XCTestCase {
     private var builder: HabitCalendarBuilder!
     
+    // MARK: - Lifecycle
     override func setUp() {
         super.setUp()
         builder = HabitCalendarBuilder()
@@ -21,6 +22,7 @@ final class HabitCalendarBuilderTests: XCTestCase {
         super.tearDown()
     }
     
+    // MARK: - Building Days
     func testBuildDaysReturnsEmptyArrayWhenCreatedAtIsNil() {
         let today = makeDate(year: 2026, month: 7, day: 10)
         
@@ -85,31 +87,33 @@ final class HabitCalendarBuilderTests: XCTestCase {
 
            XCTAssertEqual(days.first?.date, makeDate(year: 2026, month: 7, day: 31))
        }
+    
+    // MARK: - Completion Check
+    func testIsCompletedTodayReturnsTrueWhenCompletedDatesContainToday() {
+       let today = makeDate(year: 2026, month: 7, day: 10)
+       let todayEvening = makeDate(year: 2026, month: 7, day: 10, hour: 20)
 
-       func testIsCompletedTodayReturnsTrueWhenCompletedDatesContainToday() {
-           let today = makeDate(year: 2026, month: 7, day: 10)
-           let todayEvening = makeDate(year: 2026, month: 7, day: 10, hour: 20)
+       let isCompleted = builder.isCompletedToday(
+           completedDates: [todayEvening],
+           today: today
+       )
 
-           let isCompleted = builder.isCompletedToday(
-               completedDates: [todayEvening],
-               today: today
-           )
+       XCTAssertTrue(isCompleted)
+    }
 
-           XCTAssertTrue(isCompleted)
-       }
+    // MARK: - Helpers
+    private func makeDate(
+       year: Int,
+       month: Int,
+       day: Int,
+       hour: Int = 0
+    ) -> Date {
+       var components = DateComponents()
+       components.year = year
+       components.month = month
+       components.day = day
+       components.hour = hour
 
-       private func makeDate(
-           year: Int,
-           month: Int,
-           day: Int,
-           hour: Int = 0
-       ) -> Date {
-           var components = DateComponents()
-           components.year = year
-           components.month = month
-           components.day = day
-           components.hour = hour
-
-           return Calendar.current.date(from: components)!
-       }
+       return Calendar.current.date(from: components)!
+    }
 }

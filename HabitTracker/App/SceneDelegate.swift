@@ -19,9 +19,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         
         let assembly = AppAssembly()
-        let habitTrackerViewController = assembly.buildHabitListScreen()
         
-        window.rootViewController = UINavigationController(rootViewController: habitTrackerViewController)
+        window.rootViewController = assembly.buildMainTabBar()
         
         self.window = window
         window.makeKeyAndVisible()
@@ -54,4 +53,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
 }
-
