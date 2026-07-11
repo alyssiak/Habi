@@ -28,6 +28,10 @@ struct StatisticsViewState {
     let overallProgress: Double
     let overallPercentText: String
     let habitProgressItems: [HabitProgressItem]
+    let monthDays: [MonthProgressDay]
+    let selectedMonthText: String?
+    let canShowNextMonth: Bool
+    let topHabitProgressItems: [TopHabitProgressItem]
 }
 
 struct HabitProgressItem {
@@ -46,4 +50,18 @@ struct HabitProgressDay {
     let title: String
     let isCompleted: Bool
     let isFuture: Bool
+}
+
+struct MonthProgressDay {
+    let title: String
+    let progress: Double
+    let isFuture: Bool
+}
+
+struct TopHabitProgressItem {
+    let title: String
+    let colorHex: String?
+    let progress: Double
+    let progressText: String
+    let completedText: String
 }

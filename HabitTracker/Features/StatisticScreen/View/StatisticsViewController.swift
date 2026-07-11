@@ -43,6 +43,14 @@ final class StatisticsViewController: UIViewController {
         statisticsView.onPeriodSelected = { [weak self] period in
             self?.viewModel.selectPeriod(period)
         }
+
+        statisticsView.onPreviousMonthTapped = { [weak self] in
+            self?.viewModel.showPreviousMonth()
+        }
+
+        statisticsView.onNextMonthTapped = { [weak self] in
+            self?.viewModel.showNextMonth()
+        }
     }
     
     private func setupViewController() {

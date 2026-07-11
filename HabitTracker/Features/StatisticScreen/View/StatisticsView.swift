@@ -21,9 +21,14 @@ final class StatisticsView: UIView {
     private let overallTitleLabel = UILabel()
     private let overallSubtitleLabel = UILabel()
     private let progressRingView = StatisticsProgressRingView()
+    private let sectionsStackView = UIStackView()
     private let habitsStackView = UIStackView()
+    private let monthOverviewView = MonthProgressOverviewView()
+    private let topHabitsChartView = TopHabitsChartView()
     
     var onPeriodSelected: ((StatisticsPeriod) -> Void)?
+    var onPreviousMonthTapped: (() -> Void)?
+    var onNextMonthTapped: (() -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -31,7 +36,10 @@ final class StatisticsView: UIView {
         setupView()
         setupSegmentedControl()
         setupOverallCard()
+        setupSectionsStackView()
         setupHabitsStackView()
+        setupMonthOverviewView()
+        setupTopHabitsChartView()
         setupConstraints()
     }
     
@@ -45,6 +53,12 @@ final class StatisticsView: UIView {
         progressRingView.render(progress: state.overallProgress, percentText: state.overallPercentText)
         updateSelectedPeriod(state.selectedPeriod)
         renderHabitCards(state.habitProgressItems)
+        renderMonthOverview(
+            days: state.monthDays,
+            monthTitle: state.selectedMonthText,
+            canShowNextMonth: state.canShowNextMonth
+        )
+        renderTopHabits(state.topHabitProgressItems)
         
     }
     
@@ -105,7 +119,29 @@ private extension StatisticsView {
         habitsStackView.axis = .vertical
         habitsStackView.spacing = 16
 
-        contentView.addSubview(habitsStackView)
+        sectionsStackView.addArrangedSubview(habitsStackView)
+    }
+
+    func setupMonthOverviewView() {
+        monthOverviewView.isHidden = true
+        monthOverviewView.onPreviousMonthTapped = { [weak self] in
+            self?.onPreviousMonthTapped?()
+        }
+        monthOverviewView.onNextMonthTapped = { [weak self] in
+            self?.onNextMonthTapped?()
+        }
+        sectionsStackView.addArrangedSubview(monthOverviewView)
+    }
+
+    func setupTopHabitsChartView() {
+        topHabitsChartView.isHidden = true
+        sectionsStackView.addArrangedSubview(topHabitsChartView)
+    }
+
+    func setupSectionsStackView() {
+        sectionsStackView.axis = .vertical
+        sectionsStackView.spacing = 16
+        contentView.addSubview(sectionsStackView)
     }
     
 }
@@ -152,7 +188,7 @@ private extension StatisticsView {
             make.width.height.equalTo(86)
         }
 
-        habitsStackView.snp.makeConstraints { make in
+        sectionsStackView.snp.makeConstraints { make in
             make.top.equalTo(overallCardView.snp.bottom).offset(20)
             make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(24)
@@ -163,6 +199,8 @@ private extension StatisticsView {
 //MARK: - Card render
 private extension StatisticsView {
     func renderHabitCards(_ items: [HabitProgressItem]) {
+        habitsStackView.isHidden = items.isEmpty
+
         habitsStackView.arrangedSubviews.forEach { view in
             habitsStackView.removeArrangedSubview(view)
             view.removeFromSuperview()
@@ -173,5 +211,22 @@ private extension StatisticsView {
             cardView.render(item)
             habitsStackView.addArrangedSubview(cardView)
         }
+    }
+
+    func renderMonthOverview(
+        days: [MonthProgressDay],
+        monthTitle: String?,
+        canShowNextMonth: Bool
+    ) {
+        monthOverviewView.isHidden = days.isEmpty
+        monthOverviewView.render(
+            monthTitle: monthTitle,
+            days: days,
+            canShowNextMonth: canShowNextMonth
+        )
+    }
+
+    func renderTopHabits(_ items: [TopHabitProgressItem]) {
+        topHabitsChartView.render(items: items)
     }
 }

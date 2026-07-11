@@ -13,8 +13,7 @@ final class HabitProgressCardView: UIView {
     private let titleLabel = UILabel()
     private let streakLabel = UILabel()
     
-    private let daysTitleStackView = UIStackView()
-    private let daysSquaresStackView = UIStackView()
+    private let daysView = HabitProgressDaysView()
 
     private let progressTitleLabel = UILabel()
     private let progressPercentLabel = UILabel()
@@ -56,7 +55,10 @@ final class HabitProgressCardView: UIView {
         completedLabel.text = item.completedText
         progressFillView.backgroundColor = accentColor
 
-        renderDays(item.days, accentColor: accentColor)
+        daysView.render(
+            days: item.days,
+            accentColor: accentColor
+        )
         updateProgress(item.progress)
     }
     
@@ -90,16 +92,7 @@ private extension HabitProgressCardView {
     }
 
     func setupDays() {
-        daysTitleStackView.axis = .horizontal
-        daysTitleStackView.distribution = .fillEqually
-        daysTitleStackView.spacing = 8
-
-        daysSquaresStackView.axis = .horizontal
-        daysSquaresStackView.distribution = .fillEqually
-        daysSquaresStackView.spacing = 8
-
-        addSubview(daysTitleStackView)
-        addSubview(daysSquaresStackView)
+        addSubview(daysView)
     }
 
     func setupProgress() {
@@ -151,20 +144,13 @@ private extension HabitProgressCardView {
             make.height.equalTo(28)
         }
 
-        daysTitleStackView.snp.makeConstraints { make in
+        daysView.snp.makeConstraints { make in
             make.top.equalTo(accentView.snp.bottom).offset(18)
             make.leading.trailing.equalToSuperview().inset(22)
-            make.height.equalTo(18)
-        }
-
-        daysSquaresStackView.snp.makeConstraints { make in
-            make.top.equalTo(daysTitleStackView.snp.bottom).offset(6)
-            make.leading.trailing.equalTo(daysTitleStackView)
-            make.height.equalTo(34)
         }
 
         progressTitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(daysSquaresStackView.snp.bottom).offset(18)
+            make.top.equalTo(daysView.snp.bottom).offset(18)
             make.leading.equalToSuperview().inset(22)
         }
 
@@ -194,54 +180,6 @@ private extension HabitProgressCardView {
 
 //MARK: - Render
 private extension HabitProgressCardView {
-    func renderDays(_ days: [HabitProgressDay], accentColor: UIColor) {
-        daysTitleStackView.arrangedSubviews.forEach { view in
-            daysTitleStackView.removeArrangedSubview(view)
-            view.removeFromSuperview()
-        }
-
-        daysSquaresStackView.arrangedSubviews.forEach { view in
-            daysSquaresStackView.removeArrangedSubview(view)
-            view.removeFromSuperview()
-        }
-
-        days.forEach { day in
-            let titleLabel = UILabel()
-            titleLabel.text = day.title
-            titleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 12)
-            titleLabel.textColor = .secondaryLabel
-            titleLabel.textAlignment = .center
-
-            let squareView = UIView()
-            squareView.layer.cornerRadius = 10
-            squareView.backgroundColor = day.isCompleted
-                ? accentColor
-                : UIColor(hex: "#E9DDF5")
-
-            
-            if day.isFuture {
-                squareView.backgroundColor = UIColor.systemGray5
-                squareView.alpha = 1
-            }
-
-            if day.isCompleted {
-                let checkImageView = UIImageView(image: UIImage(systemName: "checkmark"))
-                checkImageView.tintColor = .white
-                checkImageView.contentMode = .scaleAspectFit
-
-                squareView.addSubview(checkImageView)
-
-                checkImageView.snp.makeConstraints { make in
-                    make.center.equalToSuperview()
-                    make.size.equalTo(14)
-                }
-            }
-            
-            daysTitleStackView.addArrangedSubview(titleLabel)
-            daysSquaresStackView.addArrangedSubview(squareView)
-        }
-    }
-
     func updateProgress(_ progress: Double) {
         self.progress = max(0, min(progress, 1))
         setNeedsLayout()
