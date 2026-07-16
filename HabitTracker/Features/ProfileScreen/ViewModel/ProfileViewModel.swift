@@ -11,6 +11,7 @@ import Combine
 final class ProfileViewModel {
     //MARK: - Properties
     @Published private(set) var state = ProfileViewState(
+        avatarData: nil,
         userName: "Alice",
         subtitle: "Habit builder",
         profileMessage: "Small steps still count.",
@@ -67,6 +68,7 @@ final class ProfileViewModel {
         let perfectDays = makePerfectDaysCount(from: habits)
 
         return ProfileViewState(
+            avatarData: profile.avatarData,
             userName: profile.name,
             subtitle: "Habit builder",
             profileMessage: makeProfileMessage(progress: weeklyProgress),

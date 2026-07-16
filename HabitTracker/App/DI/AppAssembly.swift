@@ -75,7 +75,15 @@ final class AppAssembly {
             profileRepository: container.profileRepository,
             statsCalculator: container.statsCalculator
         )
-        let profile = UINavigationController(rootViewController: ProfileViewController(viewModel: profileViewModel))
+        let profile = UINavigationController(rootViewController: ProfileViewController(
+            viewModel: profileViewModel,
+            makeEditProfileViewController: {
+                let editProfileViewModel = EditProfileViewModel(
+                    profileRepository: self.container.profileRepository
+                )
+                return EditProfileViewController(viewModel: editProfileViewModel)
+            }
+        ))
         profile.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person"), tag: 2)
 
         return MainTabBarController(viewControllers: [habits, statistics, profile])

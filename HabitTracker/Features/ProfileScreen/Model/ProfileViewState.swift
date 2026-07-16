@@ -8,6 +8,7 @@
 import Foundation
 
 struct ProfileViewState {
+    let avatarData: Data?
     let userName: String
     let subtitle: String
     let profileMessage: String

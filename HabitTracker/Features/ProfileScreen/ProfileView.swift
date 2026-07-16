@@ -51,6 +51,14 @@ final class ProfileView: UIView {
     }
 
     func configure(with state: ProfileViewState) {
+        if let avatarData = state.avatarData,
+           let image = UIImage(data: avatarData) {
+            avatarImageView.image = image
+            avatarImageView.tintColor = nil
+        } else {
+            avatarImageView.image = UIImage(systemName: "person.crop.circle.fill")
+            avatarImageView.tintColor = .appOrange
+        }
         nameLabel.text = state.userName
         subtitleLabel.text = state.subtitle
         profileMessageLabel.text = state.profileMessage
@@ -75,8 +83,10 @@ private extension ProfileView {
 
         avatarImageView.image = UIImage(systemName: "person.crop.circle.fill")
         avatarImageView.tintColor = .appOrange
-        avatarImageView.contentMode = .scaleAspectFit
-
+        avatarImageView.contentMode = .scaleAspectFill
+        avatarImageView.layer.cornerRadius = Layout.avatarSize / 2
+        avatarImageView.clipsToBounds = true
+        
         nameLabel.font = UIFont(name: "Montserrat-SemiBold", size: 28)
         nameLabel.textColor = .label
         nameLabel.numberOfLines = 1

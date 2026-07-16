@@ -11,11 +11,16 @@ import Combine
 final class ProfileViewController: UIViewController {
     private let profileView = ProfileView()
     private let viewModel: ProfileViewModel
+    private let makeEditProfileViewController: () -> UIViewController
     private var cancellables = Set<AnyCancellable>()
 
     //MARK: - Initialization
-    init(viewModel: ProfileViewModel) {
+    init(
+        viewModel: ProfileViewModel,
+        makeEditProfileViewController: @escaping () -> UIViewController
+    ) {
         self.viewModel = viewModel
+        self.makeEditProfileViewController = makeEditProfileViewController
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -49,29 +54,14 @@ private extension ProfileViewController {
 
     func setupActions() {
         profileView.onEditProfileTapped = { [weak self] in
-            self?.showEditProfileAlert()
+            self?.openEditProfile()
         }
     }
 
-    func showEditProfileAlert() {
-        let alertController = UIAlertController(
-            title: "Edit profile",
-            message: "Enter the name you want to show in the app.",
-            preferredStyle: .alert
-        )
+    func openEditProfile() {
+        let editProfileViewController = makeEditProfileViewController()
+        let navigationController = UINavigationController(rootViewController: editProfileViewController)
 
-        alertController.addTextField { [weak self] textField in
-            textField.text = self?.viewModel.state.userName
-            textField.placeholder = "Name"
-            textField.clearButtonMode = .whileEditing
-        }
-
-        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alertController.addAction(UIAlertAction(title: "Save", style: .default) { [weak self, weak alertController] _ in
-            let name = alertController?.textFields?.first?.text ?? ""
-            self?.viewModel.updateUserName(name)
-        })
-
-        present(alertController, animated: true)
+        present(navigationController, animated: true)
     }
 }
