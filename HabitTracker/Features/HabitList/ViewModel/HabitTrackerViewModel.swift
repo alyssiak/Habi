@@ -14,29 +14,40 @@ final class HabitTrackerViewModel {
     @Published private(set) var quote: Quote?
     private let statsCalculator: HabitStatsCalculating
     private let repository: HabitRepositoryProtocol
+    private let profileRepository: ProfileRepositoryProtocol
     private let quoteService: QuoteServiceProtocol
     private let calendarBuilder: HabitCalendarBuilding
     private var cancellables = Set<AnyCancellable>()
+    
     private(set) var habits: [Habit] = []
+    
     var onUpdate: (() -> Void)?
     var onHabitsChanged: (([HabitCardModel]) -> Void)?
+    var onProfileChanged: ((HabitHeaderProfileState) -> Void)?
 
     //MARK: - Init
     init(
         repository: HabitRepositoryProtocol,
         quoteService: QuoteServiceProtocol,
         statsCalculator: HabitStatsCalculating,
-        calendarBuilder: HabitCalendarBuilding
-        
+        calendarBuilder: HabitCalendarBuilding,
+        profileRepository: ProfileRepositoryProtocol
     ) {
         self.repository = repository
         self.quoteService = quoteService
         self.statsCalculator = statsCalculator
         self.calendarBuilder = calendarBuilder
+        self.profileRepository = profileRepository
         
         repository.changesPublisher
             .sink { [weak self] in
                 self?.loadHabits()
+            }
+            .store(in: &cancellables)
+        
+        profileRepository.changesPublisher
+            .sink { [weak self] in
+                self?.loadProfile()
             }
             .store(in: &cancellables)
     }
@@ -107,6 +118,19 @@ final class HabitTrackerViewModel {
             }
         }
     }
+    
+    //MARK - Repository
+    func loadProfile() {
+        let profile = profileRepository.fetchProfile()
+
+        onProfileChanged?(
+            HabitHeaderProfileState(
+                name: profile.name,
+                avatarData: profile.avatarData
+            )
+        )
+    }
+    
     //MARK: - Private Helpers
     private func mapToCardModel(habit: Habit) -> HabitCardModel {
         let records = habit.records as? Set<HabitRecord> ?? []

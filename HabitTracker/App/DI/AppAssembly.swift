@@ -20,7 +20,8 @@ final class AppAssembly {
             repository: container.repository,
             quoteService: container.quoteService,
             statsCalculator: container.statsCalculator,
-            calendarBuilder: container.calendarBuilder
+            calendarBuilder: container.calendarBuilder,
+            profileRepository: container.profileRepository
         )
         
         let viewController = HabitTrackerViewController(

@@ -96,7 +96,7 @@ final class HabitTrackerViewController: UIViewController {
         setupConstraints()
         bindViewModel()
         viewModel.loadHabits()
-        
+        viewModel.loadProfile()
         Task {
             await viewModel.loadQuote()
         }
@@ -115,6 +115,8 @@ private extension HabitTrackerViewController {
         avatarImageView.image = UIImage(systemName: "person.circle")
         avatarImageView.tintColor = .systemGray
         avatarImageView.contentMode = .scaleAspectFit
+        avatarImageView.layer.cornerRadius = Layout.avatarSize / 2
+        avatarImageView.clipsToBounds = true
 
         greetingLabel.text = "Hello!"
         greetingLabel.font = UIFont(name: "Montserrat-SemiBold", size: 24)
@@ -302,6 +304,10 @@ private extension HabitTrackerViewController {
             }
             // & здесь значит, что мы передаем cancellables как изменяемое хранилище.
             .store(in: &cancellables)
+        
+        viewModel.onProfileChanged = { [weak self] state in
+            self?.renderProfile(state)
+        }
     }
 
     func renderHabits(_ models: [HabitCardModel]) {
@@ -320,7 +326,22 @@ private extension HabitTrackerViewController {
         quoteTextLabel.text = "\(quote.text)"
         quoteAuthorLabel.text = "— \(quote.author)"
     }
+    
+    func renderProfile(_ state: HabitHeaderProfileState) {
+        greetingLabel.text = "Hello, \(state.name)!"
 
+        if let avatarData = state.avatarData,
+           let image = UIImage(data: avatarData) {
+            avatarImageView.image = image
+            avatarImageView.tintColor = nil
+            avatarImageView.contentMode = .scaleAspectFill
+        } else {
+            avatarImageView.image = UIImage(systemName: "person.circle")
+            avatarImageView.tintColor = .systemGray
+            avatarImageView.contentMode = .scaleAspectFit
+        }
+    }
+    
     func updateEmptyState() {
         let isEmpty = habitModels.isEmpty
 
