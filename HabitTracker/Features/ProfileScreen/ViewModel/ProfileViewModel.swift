@@ -13,8 +13,8 @@ final class ProfileViewModel {
     @Published private(set) var state = ProfileViewState(
         avatarData: nil,
         userName: "Alice",
-        subtitle: "Habit builder",
-        profileMessage: "Small steps still count.",
+        quoteText: "Track your habits to stay motivated.",
+        quoteAuthor: nil,
         bubbleMetrics: [],
         settingsItems: []
     )
@@ -22,23 +22,40 @@ final class ProfileViewModel {
     private let repository: HabitRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
     private let statsCalculator: HabitStatsCalculating
+    private let quoteService: QuoteServiceProtocol
+    private var quote: Quote?
     private var cancellables = Set<AnyCancellable>()
 
     //MARK: - Initialization
     init(
         repository: HabitRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
-        statsCalculator: HabitStatsCalculating
+        statsCalculator: HabitStatsCalculating,
+        quoteService: QuoteServiceProtocol
     ) {
         self.repository = repository
         self.profileRepository = profileRepository
         self.statsCalculator = statsCalculator
+        self.quoteService = quoteService
         bindRepositoryChanges()
     }
 
     //MARK: - Public methods
     func loadProfile() {
         state = makeState()
+    }
+
+    func loadQuote() async {
+        do {
+            let quote = try await quoteService.fetchQuote()
+
+            await MainActor.run {
+                self.quote = quote
+                self.state = self.makeState()
+            }
+        } catch {
+            print(error)
+        }
     }
 
     func updateUserName(_ userName: String) {
@@ -70,8 +87,8 @@ final class ProfileViewModel {
         return ProfileViewState(
             avatarData: profile.avatarData,
             userName: profile.name,
-            subtitle: "Habit builder",
-            profileMessage: makeProfileMessage(progress: weeklyProgress),
+            quoteText: quote?.text ?? "Track your habits to stay motivated.",
+            quoteAuthor: quote?.author,
             bubbleMetrics: [
                 ProfileBubbleMetric(
                     value: "\(overallStats.currentStreak)",
@@ -185,16 +202,4 @@ private extension ProfileViewModel {
         "\(Int((progress * 100).rounded()))%"
     }
 
-    func makeProfileMessage(progress: Double) -> String {
-        switch progress {
-        case 0.8...:
-            return "Amazing rhythm. Keep it steady."
-        case 0.5..<0.8:
-            return "You're building consistency. Keep going."
-        case 0.1..<0.5:
-            return "Small steps still count. Pick one habit today."
-        default:
-            return "Ready for a fresh start today."
-        }
-    }
 }

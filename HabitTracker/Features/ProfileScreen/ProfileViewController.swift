@@ -39,6 +39,9 @@ final class ProfileViewController: UIViewController {
         bindViewModel()
         setupActions()
         viewModel.loadProfile()
+        Task {
+            await viewModel.loadQuote()
+        }
     }
 }
 

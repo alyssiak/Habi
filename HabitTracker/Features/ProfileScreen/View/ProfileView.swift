@@ -16,9 +16,12 @@ final class ProfileView: UIView {
     private let profileCardView = UIView()
     private let avatarImageView = UIImageView()
     private let nameLabel = UILabel()
-    private let subtitleLabel = UILabel()
-    private let profileMessageLabel = UILabel()
     private let editProfileButton = UIButton(type: .system)
+
+    private let quoteStackView = UIStackView()
+    private let quoteTitleLabel = UILabel()
+    private let quoteTextLabel = UILabel()
+    private let quoteAuthorLabel = UILabel()
 
     private let bubbleStatsView = ProfileBubbleStatsView()
 
@@ -60,8 +63,9 @@ final class ProfileView: UIView {
             avatarImageView.tintColor = .appOrange
         }
         nameLabel.text = state.userName
-        subtitleLabel.text = state.subtitle
-        profileMessageLabel.text = state.profileMessage
+        quoteTextLabel.text = state.quoteText
+        quoteAuthorLabel.text = state.quoteAuthor.map { "— \($0)" }
+        quoteAuthorLabel.isHidden = state.quoteAuthor == nil
         bubbleStatsView.configure(with: state.bubbleMetrics)
 
         renderSettingsItems(state.settingsItems)
@@ -91,18 +95,28 @@ private extension ProfileView {
         nameLabel.textColor = .label
         nameLabel.numberOfLines = 1
 
-        subtitleLabel.font = UIFont(name: "Montserrat-Regular", size: 15)
-        subtitleLabel.textColor = .secondaryLabel
-
-        profileMessageLabel.font = UIFont(name: "Montserrat-Medium", size: 14)
-        profileMessageLabel.textColor = .secondaryLabel
-        profileMessageLabel.numberOfLines = 0
-
         editProfileButton.setImage(UIImage(systemName: "square.and.pencil"), for: .normal)
         editProfileButton.tintColor = .label
         editProfileButton.backgroundColor = .clear
         editProfileButton.layer.cornerRadius = Layout.editButtonSize / 2
         editProfileButton.addTarget(self, action: #selector(didTapEditProfile), for: .touchUpInside)
+
+        quoteTitleLabel.text = "Quote of the day"
+        quoteTitleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 16)
+        quoteTitleLabel.textColor = .label
+
+        quoteTextLabel.font = UIFont(name: "Montserrat-Regular", size: 14)
+        quoteTextLabel.textColor = .secondaryLabel
+        quoteTextLabel.numberOfLines = 0
+
+        quoteAuthorLabel.font = UIFont(name: "Montserrat-SemiBold", size: 12)
+        quoteAuthorLabel.textColor = .tertiaryLabel
+
+        quoteStackView.axis = .vertical
+        quoteStackView.spacing = 6
+        quoteStackView.addArrangedSubview(quoteTitleLabel)
+        quoteStackView.addArrangedSubview(quoteTextLabel)
+        quoteStackView.addArrangedSubview(quoteAuthorLabel)
 
         settingsTitleLabel.text = "Settings"
         settingsTitleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 20)
@@ -112,14 +126,13 @@ private extension ProfileView {
         settingsStackView.spacing = 10
 
         contentView.addSubview(profileCardView)
+        contentView.addSubview(quoteStackView)
         contentView.addSubview(bubbleStatsView)
         contentView.addSubview(settingsTitleLabel)
         contentView.addSubview(settingsStackView)
 
         profileCardView.addSubview(avatarImageView)
         profileCardView.addSubview(nameLabel)
-        profileCardView.addSubview(subtitleLabel)
-        profileCardView.addSubview(profileMessageLabel)
         profileCardView.addSubview(editProfileButton)
     }
 
@@ -141,6 +154,7 @@ private extension ProfileView {
         avatarImageView.snp.makeConstraints { make in
             make.top.leading.equalToSuperview().inset(Layout.cardInset)
             make.size.equalTo(Layout.avatarSize)
+            make.bottom.equalToSuperview().inset(Layout.cardInset)
         }
 
         editProfileButton.snp.makeConstraints { make in
@@ -149,24 +163,18 @@ private extension ProfileView {
         }
 
         nameLabel.snp.makeConstraints { make in
-            make.top.equalTo(avatarImageView.snp.top).offset(6)
             make.leading.equalTo(avatarImageView.snp.trailing).offset(14)
             make.trailing.lessThanOrEqualTo(editProfileButton.snp.leading).offset(-12)
+            make.centerY.equalTo(avatarImageView)
         }
 
-        subtitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(nameLabel.snp.bottom).offset(4)
-            make.leading.equalTo(nameLabel)
-            make.trailing.lessThanOrEqualTo(editProfileButton.snp.leading).offset(-12)
-        }
-
-        profileMessageLabel.snp.makeConstraints { make in
-            make.top.equalTo(avatarImageView.snp.bottom).offset(18)
-            make.leading.trailing.bottom.equalToSuperview().inset(Layout.cardInset)
+        quoteStackView.snp.makeConstraints { make in
+            make.top.equalTo(profileCardView.snp.bottom).offset(18)
+            make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
         }
 
         bubbleStatsView.snp.makeConstraints { make in
-            make.top.equalTo(profileCardView.snp.bottom).offset(18)
+            make.top.equalTo(quoteStackView.snp.bottom).offset(20)
             make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
             make.height.equalTo(280)
         }

@@ -8,17 +8,12 @@
 import UIKit
 import SnapKit
 import CoreData
-import Combine
 
 final class HabitTrackerViewController: UIViewController {
 
-    private var cancellables = Set<AnyCancellable>()
     // MARK: - Properties
-
     private let avatarImageView = UIImageView()
     private let greetingLabel = UILabel()
-    private let quoteTextLabel = UILabel()
-    private let quoteAuthorLabel = UILabel()
     private let addHabitButton = UIButton()
     private let archiveButton = UIButton(type: .system)
     private let headerStackView = UIStackView()
@@ -31,6 +26,7 @@ final class HabitTrackerViewController: UIViewController {
     private let undoBannerStackView = UIStackView()
     private let undoMessageLabel = UILabel()
     private let undoButton = UIButton(type: .system)
+    private let todayProgressView = TodayProgressView()
 
     private var habitModels: [HabitCardModel] = []
     private let viewModel: HabitTrackerViewModel
@@ -39,15 +35,15 @@ final class HabitTrackerViewController: UIViewController {
     private let makeDetailsViewController: (HabitCardModel) -> UIViewController
     private let makeHabitFormViewController: (AddHabitViewController.Mode) -> UIViewController
     private let makeArchiveViewController: () -> UIViewController
-    // MARK: - Layout
 
+    // MARK: - Layout
     private enum Layout {
         static let horizontalInset: CGFloat = 20
         static let headerTopOffset: CGFloat = 24
-        static let tableTopOffset: CGFloat = 26
+        static let tableTopOffset: CGFloat = 20
         static let avatarSize: CGFloat = 56
-        static let addButtonSize: CGFloat = 56
-        static let addButtonBottomOffset: CGFloat = 20
+        static let addButtonSize: CGFloat = 58
+        static let addButtonBottomOffset: CGFloat = 30
         static let tableBottomInset: CGFloat = 88
         static let rowHeight: CGFloat = 88
         static let rowSpacing: CGFloat = 12
@@ -55,6 +51,8 @@ final class HabitTrackerViewController: UIViewController {
         static let undoBannerBottomOffset: CGFloat = 12
         static let undoBannerHideDelay: TimeInterval = 10
         static let archiveButtonSize: CGFloat = 40
+        static let todayProgressTopOffset: CGFloat = 18
+        static let todayProgressHeight: CGFloat = 48
     }
 
     private struct ArchivedHabitUndoItem {
@@ -62,8 +60,7 @@ final class HabitTrackerViewController: UIViewController {
         let title: String
     }
 
-    // MARK: - Init
-
+    // MARK: - Initialization
     init(
         viewModel: HabitTrackerViewModel,
         makeDetailsViewController: @escaping (HabitCardModel) -> UIViewController,
@@ -74,7 +71,7 @@ final class HabitTrackerViewController: UIViewController {
         self.makeDetailsViewController = makeDetailsViewController
         self.makeHabitFormViewController = makeHabitFormViewController
         self.makeArchiveViewController = makeArchiveViewController
-        
+
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -83,13 +80,12 @@ final class HabitTrackerViewController: UIViewController {
     }
 
     // MARK: - Lifecycle
-
     override func viewDidLoad() {
         super.viewDidLoad()
-    
 
         setupView()
         setupHeader()
+        setupTodayProgressView()
         setupHabitsTableView()
         setupEmptyState()
         setupUndoBanner()
@@ -97,14 +93,10 @@ final class HabitTrackerViewController: UIViewController {
         bindViewModel()
         viewModel.loadHabits()
         viewModel.loadProfile()
-        Task {
-            await viewModel.loadQuote()
-        }
     }
 }
 
 // MARK: - Setup
-
 private extension HabitTrackerViewController {
 
     func setupView() {
@@ -121,46 +113,54 @@ private extension HabitTrackerViewController {
         greetingLabel.text = "Hello!"
         greetingLabel.font = UIFont(name: "Montserrat-SemiBold", size: 24)
 
-        quoteTextLabel.numberOfLines = 0
-        quoteTextLabel.font = UIFont(name: "Montserrat-Regular", size: 15)
-        quoteTextLabel.textColor = .label
-
-        quoteAuthorLabel.font = UIFont(name: "Montserrat-SemiBold", size: 13)
-        quoteAuthorLabel.textColor = .secondaryLabel
-
-        addHabitButton.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
-        addHabitButton.backgroundColor = .systemOrange
+        addHabitButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        addHabitButton.setPreferredSymbolConfiguration(
+            UIImage.SymbolConfiguration(pointSize: 22, weight: .semibold),
+            forImageIn: .normal
+        )
+        addHabitButton.backgroundColor = .appOrange
         addHabitButton.tintColor = .white
-        addHabitButton.layer.cornerRadius = 8
+        addHabitButton.layer.cornerRadius = 20
+        addHabitButton.layer.shadowColor = UIColor.appOrange.cgColor
+        addHabitButton.layer.shadowOpacity = 0.22
+        addHabitButton.layer.shadowRadius = 12
+        addHabitButton.layer.shadowOffset = CGSize(width: 0, height: 6)
         addHabitButton.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
-        
+
         archiveButton.setImage(UIImage(systemName: "archivebox"), for: .normal)
-        archiveButton.tintColor = .label
-        archiveButton.backgroundColor = .secondarySystemBackground
-        archiveButton.layer.cornerRadius = 8
+        archiveButton.setPreferredSymbolConfiguration(
+            UIImage.SymbolConfiguration(pointSize: 19, weight: .medium),
+            forImageIn: .normal
+        )
+        archiveButton.tintColor = .secondaryLabel
+        archiveButton.backgroundColor = .clear
+        archiveButton.layer.cornerRadius = Layout.archiveButtonSize / 2
         archiveButton.addTarget(self, action: #selector(didTapArchiveButton), for: .touchUpInside)
-        
+
         textStackView.axis = .vertical
         textStackView.spacing = 6
         textStackView.addArrangedSubview(greetingLabel)
-        textStackView.addArrangedSubview(quoteTextLabel)
-        textStackView.addArrangedSubview(quoteAuthorLabel)
 
         headerStackView.axis = .horizontal
         headerStackView.spacing = 16
-        headerStackView.alignment = .center
-        
+        headerStackView.alignment = .top
+
         textStackView.setContentHuggingPriority(.defaultLow, for: .horizontal)
         textStackView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         archiveButton.setContentHuggingPriority(.required, for: .horizontal)
         archiveButton.setContentCompressionResistancePriority(.required, for: .horizontal)
-        
+
         headerStackView.addArrangedSubview(avatarImageView)
         headerStackView.addArrangedSubview(textStackView)
         headerStackView.addArrangedSubview(archiveButton)
         view.addSubview(headerStackView)
         view.addSubview(addHabitButton)
+    }
+
+    func setupTodayProgressView() {
+        todayProgressView.isHidden = true
+        view.addSubview(todayProgressView)
     }
 
     func setupHabitsTableView() {
@@ -252,13 +252,19 @@ private extension HabitTrackerViewController {
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(Layout.headerTopOffset)
             make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
         }
-        
+
         archiveButton.snp.makeConstraints { make in
-            make.size.equalTo(40)
+            make.size.equalTo(Layout.archiveButtonSize)
         }
-        
+
+        todayProgressView.snp.makeConstraints { make in
+            make.top.equalTo(headerStackView.snp.bottom).offset(Layout.todayProgressTopOffset)
+            make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
+            make.height.equalTo(Layout.todayProgressHeight)
+        }
+
         habitsTableView.snp.makeConstraints { make in
-            make.top.equalTo(headerStackView.snp.bottom).offset(Layout.tableTopOffset)
+            make.top.equalTo(todayProgressView.snp.bottom).offset(Layout.tableTopOffset)
             make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
             make.bottom.equalToSuperview()
         }
@@ -273,8 +279,8 @@ private extension HabitTrackerViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Layout.addButtonBottomOffset)
             make.size.equalTo(Layout.addButtonSize)
         }
-        
-        
+
+
         undoBannerView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(Layout.horizontalInset)
             make.bottom.equalTo(addHabitButton.snp.top).offset(-Layout.undoBannerBottomOffset)
@@ -289,25 +295,21 @@ private extension HabitTrackerViewController {
 }
 
 // MARK: - Binding
-
 private extension HabitTrackerViewController {
 
     func bindViewModel() {
         viewModel.onHabitsChanged = { [weak self] models in
             self?.renderHabits(models)
         }
-        
-        viewModel.$quote
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] quote in
-                self?.renderQuote(quote)
-            }
-            // & здесь значит, что мы передаем cancellables как изменяемое хранилище.
-            .store(in: &cancellables)
-        
+
+        viewModel.onTodayProgressChanged = { [weak self] state in
+            self?.renderTodayProgress(state)
+        }
+
         viewModel.onProfileChanged = { [weak self] state in
             self?.renderProfile(state)
         }
+
     }
 
     func renderHabits(_ models: [HabitCardModel]) {
@@ -315,18 +317,7 @@ private extension HabitTrackerViewController {
         habitsTableView.reloadData()
         updateEmptyState()
     }
-    
-    func renderQuote(_ quote: Quote?) {
-        guard let quote else {
-            quoteTextLabel.text = "Track your habits to stay motivated."
-            quoteAuthorLabel.text = nil
-            return
-        }
-        
-        quoteTextLabel.text = "\(quote.text)"
-        quoteAuthorLabel.text = "— \(quote.author)"
-    }
-    
+
     func renderProfile(_ state: HabitHeaderProfileState) {
         greetingLabel.text = "Hello, \(state.name)!"
 
@@ -341,17 +332,22 @@ private extension HabitTrackerViewController {
             avatarImageView.contentMode = .scaleAspectFit
         }
     }
-    
+
+    func renderTodayProgress(_ state: TodayProgressState) {
+        todayProgressView.configure(with: state)
+        todayProgressView.isHidden = state.weekDays.isEmpty
+    }
+
     func updateEmptyState() {
         let isEmpty = habitModels.isEmpty
 
         habitsTableView.isHidden = isEmpty
         emptyStateStackView.isHidden = !isEmpty
+        todayProgressView.isHidden = isEmpty
     }
 }
 
 // MARK: - Actions
-
 private extension HabitTrackerViewController {
 
     @objc func didTapAddButton() {
@@ -363,7 +359,7 @@ private extension HabitTrackerViewController {
         let archiveViewController = makeArchiveViewController()
         present(archiveViewController, animated: true)
     }
-    
+
     func openEditHabit(model: HabitCardModel) {
         let addHabitViewController = makeHabitFormViewController(.edit(HabitFormModel(cardModel: model)))
 
@@ -475,7 +471,6 @@ private extension HabitTrackerViewController {
 }
 
 // MARK: - UITableViewDataSource
-
 extension HabitTrackerViewController: UITableViewDataSource {
 
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -507,7 +502,6 @@ extension HabitTrackerViewController: UITableViewDataSource {
 }
 
 // MARK: - UITableViewDelegate
-
 extension HabitTrackerViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -603,7 +597,7 @@ extension HabitTrackerViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         let model = habitModels[indexPath.section]
         let detailsViewController = makeDetailsViewController(model)
-        
+
         present(detailsViewController, animated: true)
     }
 }

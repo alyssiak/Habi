@@ -18,7 +18,6 @@ final class AppAssembly {
         
         let viewModel = HabitTrackerViewModel(
             repository: container.repository,
-            quoteService: container.quoteService,
             statsCalculator: container.statsCalculator,
             calendarBuilder: container.calendarBuilder,
             profileRepository: container.profileRepository
@@ -74,7 +73,8 @@ final class AppAssembly {
         let profileViewModel = ProfileViewModel(
             repository: container.repository,
             profileRepository: container.profileRepository,
-            statsCalculator: container.statsCalculator
+            statsCalculator: container.statsCalculator,
+            quoteService: container.quoteService
         )
         let profile = UINavigationController(rootViewController: ProfileViewController(
             viewModel: profileViewModel,

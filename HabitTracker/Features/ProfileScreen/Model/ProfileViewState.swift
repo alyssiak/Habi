@@ -10,8 +10,8 @@ import Foundation
 struct ProfileViewState {
     let avatarData: Data?
     let userName: String
-    let subtitle: String
-    let profileMessage: String
+    let quoteText: String
+    let quoteAuthor: String?
     let bubbleMetrics: [ProfileBubbleMetric]
     let settingsItems: [ProfileSettingsItem]
 }
