@@ -70,7 +70,12 @@ final class AppAssembly {
         let statistics = UINavigationController(rootViewController: StatisticsViewController(viewModel: statisticsViewModel))
         statistics.tabBarItem = UITabBarItem(title: "Statistics", image: UIImage(systemName: "chart.bar"), tag: 1)
         
-        let profile = UINavigationController(rootViewController: ProfileViewController())
+        let profileViewModel = ProfileViewModel(
+            repository: container.repository,
+            profileRepository: container.profileRepository,
+            statsCalculator: container.statsCalculator
+        )
+        let profile = UINavigationController(rootViewController: ProfileViewController(viewModel: profileViewModel))
         profile.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person"), tag: 2)
 
         return MainTabBarController(viewControllers: [habits, statistics, profile])
