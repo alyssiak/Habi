@@ -49,7 +49,7 @@ final class ArchivedHabitsViewController: UIViewController {
     // MARK: - Setup
     private extension ArchivedHabitsViewController {
         func setupView() {
-            view.backgroundColor = .systemBackground
+            view.backgroundColor = .appBackground
             
             titleLabel.text = "Archive"
             titleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 16)

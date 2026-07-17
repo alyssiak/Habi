@@ -11,4 +11,5 @@ struct UserProfileModel {
     let id: UUID?
     let name: String
     let avatarData: Data?
+    let theme: AppTheme
 }

@@ -13,6 +13,7 @@ final class ProfileViewModel {
     @Published private(set) var state = ProfileViewState(
         avatarData: nil,
         userName: "Alice",
+        theme: .system,
         quoteText: "Track your habits to stay motivated.",
         quoteAuthor: nil,
         bubbleMetrics: [],
@@ -62,6 +63,10 @@ final class ProfileViewModel {
         profileRepository.updateName(userName)
     }
 
+    func updateTheme(_ theme: AppTheme) {
+        profileRepository.updateTheme(theme)
+    }
+
     //MARK: - Binding
     private func bindRepositoryChanges() {
         repository.changesPublisher
@@ -87,6 +92,7 @@ final class ProfileViewModel {
         return ProfileViewState(
             avatarData: profile.avatarData,
             userName: profile.name,
+            theme: profile.theme,
             quoteText: quote?.text ?? "Track your habits to stay motivated.",
             quoteAuthor: quote?.author,
             bubbleMetrics: [
@@ -114,27 +120,31 @@ final class ProfileViewModel {
             settingsItems: [
                 ProfileSettingsItem(
                     title: "Theme",
-                    subtitle: "System",
+                    subtitle: profile.theme.title,
                     iconName: "moon",
-                    accessory: .chevron
+                    accessory: .chevron,
+                    action: .theme
                 ),
                 ProfileSettingsItem(
                     title: "Language",
                     subtitle: "English",
                     iconName: "globe",
-                    accessory: .chevron
+                    accessory: .chevron,
+                    action: .language
                 ),
                 ProfileSettingsItem(
                     title: "Daily reminder",
                     subtitle: "Coming soon",
                     iconName: "bell",
-                    accessory: .switcher(isOn: false)
+                    accessory: .switcher(isOn: false),
+                    action: .reminders
                 ),
                 ProfileSettingsItem(
                     title: "About",
                     subtitle: "HabitTracker MVP",
                     iconName: "info.circle",
-                    accessory: .chevron
+                    accessory: .chevron,
+                    action: .about
                 )
             ]
         )

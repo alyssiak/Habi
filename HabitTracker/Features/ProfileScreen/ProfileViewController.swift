@@ -51,6 +51,7 @@ private extension ProfileViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.profileView.configure(with: state)
+                self?.applyTheme(state.theme)
             }
             .store(in: &cancellables)
     }
@@ -59,6 +60,10 @@ private extension ProfileViewController {
         profileView.onEditProfileTapped = { [weak self] in
             self?.openEditProfile()
         }
+
+        profileView.onSettingsItemTapped = { [weak self] action in
+            self?.handleSettingsAction(action)
+        }
     }
 
     func openEditProfile() {
@@ -66,5 +71,43 @@ private extension ProfileViewController {
         let navigationController = UINavigationController(rootViewController: editProfileViewController)
 
         present(navigationController, animated: true)
+    }
+
+    func handleSettingsAction(_ action: ProfileSettingsAction) {
+        switch action {
+        case .theme:
+            showThemePicker()
+        case .language, .reminders, .about:
+            break
+        }
+    }
+
+    func showThemePicker() {
+        let selectedTheme = viewModel.state.theme
+        let options = AppTheme.allCases.map { theme in
+            SettingsOptionItem(
+                id: theme.rawValue,
+                title: theme.title,
+                isSelected: theme == selectedTheme
+            )
+        }
+
+        let viewController = SettingsOptionPickerViewController(
+            title: "Theme",
+            options: options
+        ) { [weak self] option in
+            guard let theme = AppTheme(rawValue: option.id) else {
+                return
+            }
+
+            self?.viewModel.updateTheme(theme)
+            self?.applyTheme(theme)
+        }
+
+        present(viewController, animated: true)
+    }
+
+    func applyTheme(_ theme: AppTheme) {
+        view.window?.overrideUserInterfaceStyle = theme.userInterfaceStyle
     }
 }

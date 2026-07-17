@@ -21,6 +21,6 @@ final class MainTabBarController: UITabBarController {
     
     private func setupAppearance() {
         tabBar.tintColor = .appOrange
-        tabBar.backgroundColor = .systemBackground
+        tabBar.backgroundColor = .appBackground
     }
 }

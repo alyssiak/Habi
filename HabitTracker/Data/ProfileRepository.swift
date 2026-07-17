@@ -15,6 +15,7 @@ protocol ProfileRepositoryProtocol {
     func fetchProfile() -> UserProfileModel
     func updateName(_ name: String)
     func updateAvatarData(_ data: Data?)
+    func updateTheme(_ theme: AppTheme)
 }
 
 final class CoreDataProfileRepository: ProfileRepositoryProtocol {
@@ -31,11 +32,13 @@ final class CoreDataProfileRepository: ProfileRepositoryProtocol {
 
     func fetchProfile() -> UserProfileModel {
         let profile = fetchOrCreateProfile()
+        let theme = AppTheme(rawValue: profile.themeRawValue ?? "") ?? .system
 
         return UserProfileModel(
             id: profile.id,
             name: profile.name ?? "Alice",
-            avatarData: profile.avatarData
+            avatarData: profile.avatarData,
+            theme: theme
         )
     }
 
@@ -58,6 +61,13 @@ final class CoreDataProfileRepository: ProfileRepositoryProtocol {
         profile.updatedAt = Date()
         save()
     }
+
+    func updateTheme(_ theme: AppTheme) {
+        let profile = fetchOrCreateProfile()
+        profile.themeRawValue = theme.rawValue
+        profile.updatedAt = Date()
+        save()
+    }
 }
 
 private extension CoreDataProfileRepository {
@@ -69,6 +79,8 @@ private extension CoreDataProfileRepository {
         let profile = UserProfile(context: context)
         profile.id = UUID()
         profile.name = "Alice"
+        profile.avatarData = nil
+        profile.themeRawValue = AppTheme.system.rawValue
         profile.createdAt = Date()
         profile.updatedAt = Date()
         save()

@@ -87,6 +87,12 @@ final class AppAssembly {
         ))
         profile.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person"), tag: 2)
 
-        return MainTabBarController(viewControllers: [habits, statistics, profile])
+        let mainTabBarController = MainTabBarController(viewControllers: [habits, statistics, profile])
+        mainTabBarController.overrideUserInterfaceStyle = container.profileRepository
+            .fetchProfile()
+            .theme
+            .userInterfaceStyle
+
+        return mainTabBarController
     }
 }

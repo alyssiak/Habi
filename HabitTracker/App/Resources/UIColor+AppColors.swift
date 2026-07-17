@@ -26,4 +26,16 @@ extension UIColor {
     static let appOrange = UIColor(hex: "#F59733")
     static let lastDaysGray = UIColor(hex: "#D9D9D9")
     static let nextDaysGray = UIColor(hex: "#DFDFDF")
+
+    static let appBackground = UIColor { traitCollection in
+        traitCollection.userInterfaceStyle == .dark
+            ? UIColor(hex: "#181818")
+            : .systemBackground
+    }
+
+    static let appSecondaryBackground = UIColor { traitCollection in
+        traitCollection.userInterfaceStyle == .dark
+            ? UIColor(hex: "#242424")
+            : .secondarySystemBackground
+    }
 }

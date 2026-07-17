@@ -78,7 +78,7 @@ final class StatisticsView: UIView {
 //MARK: - Setup methods
 private extension StatisticsView {
     func setupView() {
-        backgroundColor = .systemBackground
+        backgroundColor = .appBackground
 
         addSubview(scrollView)
         scrollView.addSubview(contentView)

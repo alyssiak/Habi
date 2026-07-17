@@ -58,14 +58,14 @@ final class EditProfileView: UIView {
 //MARK: - Setup View
 private extension EditProfileView {
     func setupView() {
-        backgroundColor = .systemBackground
+        backgroundColor = .appBackground
     }
 
     func setupContent() {
         avatarImageView.contentMode = .scaleAspectFill
         avatarImageView.clipsToBounds = true
         avatarImageView.layer.cornerRadius = Layout.avatarSize / 2
-        avatarImageView.backgroundColor = .secondarySystemBackground
+        avatarImageView.backgroundColor = .appSecondaryBackground
 
         changePhotoButton.setTitle("Change photo", for: .normal)
         changePhotoButton.setTitleColor(.appOrange, for: .normal)
@@ -78,7 +78,7 @@ private extension EditProfileView {
 
         nameTextField.font = UIFont(name: "Montserrat-Regular", size: 16)
         nameTextField.textColor = .label
-        nameTextField.backgroundColor = .secondarySystemBackground
+        nameTextField.backgroundColor = .appSecondaryBackground
         nameTextField.layer.cornerRadius = Layout.cornerRadius
         nameTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 14, height: 1))
         nameTextField.leftViewMode = .always

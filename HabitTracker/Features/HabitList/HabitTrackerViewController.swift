@@ -100,7 +100,7 @@ final class HabitTrackerViewController: UIViewController {
 private extension HabitTrackerViewController {
 
     func setupView() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
     }
 
     func setupHeader() {
@@ -217,7 +217,7 @@ private extension HabitTrackerViewController {
         undoBannerView.isHidden = true
 
         undoMessageLabel.font = UIFont(name: "Montserrat-Medium", size: 14)
-        undoMessageLabel.textColor = .systemBackground
+        undoMessageLabel.textColor = .appBackground
         undoMessageLabel.numberOfLines = 1
         undoMessageLabel.lineBreakMode = .byTruncatingTail
 

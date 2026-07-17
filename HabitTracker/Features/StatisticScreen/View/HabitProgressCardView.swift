@@ -68,7 +68,7 @@ final class HabitProgressCardView: UIView {
 //MARK: - Setup View
 private extension HabitProgressCardView {
     func setupView() {
-        backgroundColor = .secondarySystemBackground
+        backgroundColor = .appSecondaryBackground
         layer.cornerRadius = 16
     }
 
@@ -81,7 +81,7 @@ private extension HabitProgressCardView {
 
         streakLabel.font = UIFont(name: "Montserrat-SemiBold", size: 13)
         streakLabel.textColor = .secondaryLabel
-        streakLabel.backgroundColor = .systemBackground
+        streakLabel.backgroundColor = .appBackground
         streakLabel.textAlignment = .center
         streakLabel.layer.cornerRadius = 12
         streakLabel.layer.masksToBounds = true

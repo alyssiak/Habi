@@ -55,7 +55,7 @@ final class StatisticsViewController: UIViewController {
     
     private func setupViewController() {
         title = "Statistics"
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
     }
     
     private func bindViewModel() {

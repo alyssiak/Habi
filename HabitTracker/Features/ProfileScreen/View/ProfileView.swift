@@ -29,6 +29,7 @@ final class ProfileView: UIView {
     private let settingsStackView = UIStackView()
 
     var onEditProfileTapped: (() -> Void)?
+    var onSettingsItemTapped: ((ProfileSettingsAction) -> Void)?
 
     private enum Layout {
         static let horizontalInset: CGFloat = 20
@@ -75,7 +76,7 @@ final class ProfileView: UIView {
 //MARK: - Setup
 private extension ProfileView {
     func setupView() {
-        backgroundColor = .systemBackground
+        backgroundColor = .appBackground
 
         addSubview(scrollView)
         scrollView.addSubview(contentView)
@@ -213,9 +214,10 @@ private extension ProfileView {
     }
 
     func makeSettingsRow(_ item: ProfileSettingsItem) -> UIView {
-        let rowView = UIView()
+        let rowView = ProfileSettingsRowControl(action: item.action)
         rowView.backgroundColor = .clear
         rowView.layer.cornerRadius = Layout.rowCornerRadius
+        rowView.addTarget(self, action: #selector(didTapSettingsRow(_:)), for: .touchUpInside)
 
         let iconImageView = UIImageView()
         iconImageView.image = UIImage(systemName: item.iconName)
@@ -266,6 +268,14 @@ private extension ProfileView {
         return rowView
     }
 
+    @objc func didTapSettingsRow(_ sender: UIControl) {
+        guard let row = sender as? ProfileSettingsRowControl else {
+            return
+        }
+
+        onSettingsItemTapped?(row.action)
+    }
+
     func makeAccessoryView(_ accessory: ProfileSettingsAccessory) -> UIView {
         switch accessory {
         case .chevron:
@@ -283,6 +293,19 @@ private extension ProfileView {
             switchView.isUserInteractionEnabled = false
             return switchView
         }
+    }
+}
+
+private final class ProfileSettingsRowControl: UIControl {
+    let action: ProfileSettingsAction
+
+    init(action: ProfileSettingsAction) {
+        self.action = action
+        super.init(frame: .zero)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError()
     }
 }
 

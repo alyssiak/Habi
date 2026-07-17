@@ -10,6 +10,7 @@ import Foundation
 struct ProfileViewState {
     let avatarData: Data?
     let userName: String
+    let theme: AppTheme
     let quoteText: String
     let quoteAuthor: String?
     let bubbleMetrics: [ProfileBubbleMetric]
@@ -21,6 +22,7 @@ struct ProfileSettingsItem {
     let subtitle: String?
     let iconName: String
     let accessory: ProfileSettingsAccessory
+    let action: ProfileSettingsAction
 }
 
 enum ProfileSettingsAccessory {
@@ -39,4 +41,11 @@ enum ProfileBubbleMetricStyle {
     case blue
     case purple
     case orange
+}
+
+enum ProfileSettingsAction {
+    case theme
+    case language
+    case reminders
+    case about
 }
