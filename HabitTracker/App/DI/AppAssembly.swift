@@ -51,7 +51,10 @@ final class AppAssembly {
             },
             makeArchiveViewController: {
                 let archivedViewModel = ArchivedHabitsViewModel(repository: self.container.repository)
-                return ArchivedHabitsViewController(viewModel: archivedViewModel)
+                return ArchivedHabitsViewController(
+                    viewModel: archivedViewModel,
+                    profileRepository: self.container.profileRepository
+                )
             }
         )
         
@@ -59,16 +62,30 @@ final class AppAssembly {
     }
     
     func buildMainTabBar() -> UIViewController {
+        let userProfile = container.profileRepository.fetchProfile()
         let habits = UINavigationController(rootViewController: buildHabitListScreen())
-        habits.tabBarItem = UITabBarItem(title: "Habits", image: UIImage(systemName: "checklist"), tag: 0)
+        habits.tabBarItem = UITabBarItem(
+            title: AppStrings.habitsTab(userProfile.language),
+            image: UIImage(systemName: "checklist"),
+            tag: 0
+        )
         
         let statisticsViewModel = StatisticsViewModel(
             repository: container.repository,
             statsCalculator: container.statsCalculator
         )
         
-        let statistics = UINavigationController(rootViewController: StatisticsViewController(viewModel: statisticsViewModel))
-        statistics.tabBarItem = UITabBarItem(title: "Statistics", image: UIImage(systemName: "chart.bar"), tag: 1)
+        let statistics = UINavigationController(
+            rootViewController: StatisticsViewController(
+                viewModel: statisticsViewModel,
+                profileRepository: container.profileRepository
+            )
+        )
+        statistics.tabBarItem = UITabBarItem(
+            title: AppStrings.statisticsTab(userProfile.language),
+            image: UIImage(systemName: "chart.bar"),
+            tag: 1
+        )
         
         let profileViewModel = ProfileViewModel(
             repository: container.repository,
@@ -85,13 +102,14 @@ final class AppAssembly {
                 return EditProfileViewController(viewModel: editProfileViewModel)
             }
         ))
-        profile.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person"), tag: 2)
+        profile.tabBarItem = UITabBarItem(
+            title: AppStrings.profileTab(userProfile.language),
+            image: UIImage(systemName: "person"),
+            tag: 2
+        )
 
         let mainTabBarController = MainTabBarController(viewControllers: [habits, statistics, profile])
-        mainTabBarController.overrideUserInterfaceStyle = container.profileRepository
-            .fetchProfile()
-            .theme
-            .userInterfaceStyle
+        mainTabBarController.overrideUserInterfaceStyle = userProfile.theme.userInterfaceStyle
 
         return mainTabBarController
     }

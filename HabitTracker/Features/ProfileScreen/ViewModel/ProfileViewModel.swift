@@ -14,8 +14,12 @@ final class ProfileViewModel {
         avatarData: nil,
         userName: "Alice",
         theme: .system,
+        language: .english,
+        quoteTitle: "Quote of the day",
         quoteText: "Track your habits to stay motivated.",
         quoteAuthor: nil,
+        weeklySnapshotTitle: "Weekly snapshot",
+        settingsTitle: "Settings",
         bubbleMetrics: [],
         settingsItems: []
     )
@@ -67,6 +71,10 @@ final class ProfileViewModel {
         profileRepository.updateTheme(theme)
     }
 
+    func updateLanguage(_ language: AppLanguage) {
+        profileRepository.updateLanguage(language)
+    }
+
     //MARK: - Binding
     private func bindRepositoryChanges() {
         repository.changesPublisher
@@ -93,55 +101,59 @@ final class ProfileViewModel {
             avatarData: profile.avatarData,
             userName: profile.name,
             theme: profile.theme,
-            quoteText: quote?.text ?? "Track your habits to stay motivated.",
-            quoteAuthor: quote?.author,
+            language: profile.language,
+            quoteTitle: AppStrings.quoteTitle(profile.language),
+            quoteText: makeQuoteText(language: profile.language),
+            quoteAuthor: makeQuoteAuthor(language: profile.language),
+            weeklySnapshotTitle: AppStrings.weeklySnapshot(profile.language),
+            settingsTitle: AppStrings.settings(profile.language),
             bubbleMetrics: [
                 ProfileBubbleMetric(
                     value: "\(overallStats.currentStreak)",
-                    title: "Current\nstreak",
+                    title: AppStrings.currentStreak(profile.language),
                     style: .pink
                 ),
                 ProfileBubbleMetric(
                     value: "\(overallStats.bestStreak)",
-                    title: "Best\nstreak",
+                    title: AppStrings.bestStreak(profile.language),
                     style: .blue
                 ),
                 ProfileBubbleMetric(
                     value: makePercentText(weeklyProgress),
-                    title: "Completion\nrate",
+                    title: AppStrings.completionRate(profile.language),
                     style: .purple
                 ),
                 ProfileBubbleMetric(
                     value: "\(perfectDays)",
-                    title: "Perfect\ndays",
+                    title: AppStrings.perfectDays(profile.language),
                     style: .orange
                 )
             ],
             settingsItems: [
                 ProfileSettingsItem(
-                    title: "Theme",
-                    subtitle: profile.theme.title,
+                    title: AppStrings.theme(profile.language),
+                    subtitle: AppStrings.themeTitle(profile.theme, language: profile.language),
                     iconName: "moon",
                     accessory: .chevron,
                     action: .theme
                 ),
                 ProfileSettingsItem(
-                    title: "Language",
-                    subtitle: "English",
+                    title: AppStrings.language(profile.language),
+                    subtitle: profile.language.title,
                     iconName: "globe",
                     accessory: .chevron,
                     action: .language
                 ),
                 ProfileSettingsItem(
-                    title: "Daily reminder",
-                    subtitle: "Coming soon",
+                    title: AppStrings.dailyReminder(profile.language),
+                    subtitle: AppStrings.comingSoon(profile.language),
                     iconName: "bell",
                     accessory: .switcher(isOn: false),
                     action: .reminders
                 ),
                 ProfileSettingsItem(
-                    title: "About",
-                    subtitle: "HabitTracker MVP",
+                    title: AppStrings.about(profile.language),
+                    subtitle: AppStrings.appVersion(profile.language),
                     iconName: "info.circle",
                     accessory: .chevron,
                     action: .about
@@ -212,4 +224,19 @@ private extension ProfileViewModel {
         "\(Int((progress * 100).rounded()))%"
     }
 
+    func makeQuoteText(language: AppLanguage) -> String {
+        guard language == .english else {
+            return AppStrings.fallbackQuote(language)
+        }
+
+        return quote?.text ?? AppStrings.fallbackQuote(language)
+    }
+
+    func makeQuoteAuthor(language: AppLanguage) -> String? {
+        guard language == .english else {
+            return nil
+        }
+
+        return quote?.author
+    }
 }

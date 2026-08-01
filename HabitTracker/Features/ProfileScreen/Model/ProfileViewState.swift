@@ -11,8 +11,12 @@ struct ProfileViewState {
     let avatarData: Data?
     let userName: String
     let theme: AppTheme
+    let language: AppLanguage
+    let quoteTitle: String
     let quoteText: String
     let quoteAuthor: String?
+    let weeklySnapshotTitle: String
+    let settingsTitle: String
     let bubbleMetrics: [ProfileBubbleMetric]
     let settingsItems: [ProfileSettingsItem]
 }

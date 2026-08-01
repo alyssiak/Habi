@@ -43,6 +43,9 @@ final class EditProfileView: UIView {
     //MARK: - Configuration
     func configure(with state: EditProfileViewState) {
         nameTextField.text = state.name
+        changePhotoButton.setTitle(AppStrings.changePhoto(state.language), for: .normal)
+        nameTitleLabel.text = AppStrings.name(state.language)
+        saveButton.setTitle(AppStrings.save(state.language), for: .normal)
 
         if let avatarData = state.avatarData,
            let image = UIImage(data: avatarData) {
@@ -67,12 +70,10 @@ private extension EditProfileView {
         avatarImageView.layer.cornerRadius = Layout.avatarSize / 2
         avatarImageView.backgroundColor = .appSecondaryBackground
 
-        changePhotoButton.setTitle("Change photo", for: .normal)
         changePhotoButton.setTitleColor(.appOrange, for: .normal)
         changePhotoButton.titleLabel?.font = UIFont(name: "Montserrat-SemiBold", size: 15)
         changePhotoButton.addTarget(self, action: #selector(didTapChangePhoto), for: .touchUpInside)
 
-        nameTitleLabel.text = "Name"
         nameTitleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 16)
         nameTitleLabel.textColor = .label
 
@@ -85,7 +86,6 @@ private extension EditProfileView {
         nameTextField.clearButtonMode = .whileEditing
         nameTextField.returnKeyType = .done
 
-        saveButton.setTitle("Save", for: .normal)
         saveButton.setTitleColor(.white, for: .normal)
         saveButton.titleLabel?.font = UIFont(name: "Montserrat-SemiBold", size: 16)
         saveButton.backgroundColor = .appOrange

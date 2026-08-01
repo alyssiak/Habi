@@ -11,7 +11,8 @@ import Combine
 final class EditProfileViewModel {
     @Published private(set) var state = EditProfileViewState(
         name: "",
-        avatarData: nil
+        avatarData: nil,
+        language: .english
     )
     
     private let profileRepository: ProfileRepositoryProtocol
@@ -27,7 +28,8 @@ final class EditProfileViewModel {
         
         state = EditProfileViewState(
             name: profile.name,
-            avatarData: selectedAvatarData
+            avatarData: selectedAvatarData,
+            language: profile.language
         )
     }
     
@@ -36,7 +38,8 @@ final class EditProfileViewModel {
         
         state = EditProfileViewState(
             name: state.name,
-            avatarData: data
+            avatarData: data,
+            language: state.language
         )
     }
     

@@ -52,6 +52,7 @@ private extension ProfileViewController {
             .sink { [weak self] state in
                 self?.profileView.configure(with: state)
                 self?.applyTheme(state.theme)
+                self?.applyLanguage(state.language)
             }
             .store(in: &cancellables)
     }
@@ -77,23 +78,26 @@ private extension ProfileViewController {
         switch action {
         case .theme:
             showThemePicker()
-        case .language, .reminders, .about:
+        case .language:
+            showLanguagePicker()
+        case .reminders, .about:
             break
         }
     }
 
     func showThemePicker() {
+        let language = viewModel.state.language
         let selectedTheme = viewModel.state.theme
         let options = AppTheme.allCases.map { theme in
             SettingsOptionItem(
                 id: theme.rawValue,
-                title: theme.title,
+                title: AppStrings.themeTitle(theme, language: language),
                 isSelected: theme == selectedTheme
             )
         }
 
         let viewController = SettingsOptionPickerViewController(
-            title: "Theme",
+            title: AppStrings.theme(language),
             options: options
         ) { [weak self] option in
             guard let theme = AppTheme(rawValue: option.id) else {
@@ -107,7 +111,38 @@ private extension ProfileViewController {
         present(viewController, animated: true)
     }
 
+    func showLanguagePicker() {
+        let selectedLanguage = viewModel.state.language
+        let options = AppLanguage.allCases.map { language in
+            SettingsOptionItem(
+                id: language.rawValue,
+                title: language.title,
+                isSelected: language == selectedLanguage
+            )
+        }
+
+        let viewController = SettingsOptionPickerViewController(
+            title: AppStrings.language(selectedLanguage),
+            options: options
+        ) { [weak self] option in
+            guard let language = AppLanguage(rawValue: option.id) else {
+                return
+            }
+
+            self?.viewModel.updateLanguage(language)
+            self?.applyLanguage(language)
+        }
+
+        present(viewController, animated: true)
+    }
+
     func applyTheme(_ theme: AppTheme) {
-        view.window?.overrideUserInterfaceStyle = theme.userInterfaceStyle
+        theme.apply()
+    }
+
+    func applyLanguage(_ language: AppLanguage) {
+        tabBarController?.viewControllers?[0].tabBarItem.title = AppStrings.habitsTab(language)
+        tabBarController?.viewControllers?[1].tabBarItem.title = AppStrings.statisticsTab(language)
+        tabBarController?.viewControllers?[2].tabBarItem.title = AppStrings.profileTab(language)
     }
 }

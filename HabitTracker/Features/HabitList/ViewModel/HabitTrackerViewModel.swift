@@ -109,9 +109,14 @@ final class HabitTrackerViewModel {
         onProfileChanged?(
             HabitHeaderProfileState(
                 name: profile.name,
-                avatarData: profile.avatarData
+                avatarData: profile.avatarData,
+                language: profile.language
             )
         )
+    }
+
+    func currentLanguage() -> AppLanguage {
+        profileRepository.fetchProfile().language
     }
 
     //MARK: - Private Helpers

@@ -10,4 +10,5 @@ import Foundation
 struct EditProfileViewState {
     let name: String
     let avatarData: Data?
+    let language: AppLanguage
 }

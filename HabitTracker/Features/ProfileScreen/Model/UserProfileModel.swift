@@ -12,4 +12,5 @@ struct UserProfileModel {
     let name: String
     let avatarData: Data?
     let theme: AppTheme
+    let language: AppLanguage
 }

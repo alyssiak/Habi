@@ -35,8 +35,6 @@ final class EditProfileViewController: UIViewController {
         override func viewDidLoad() {
             super.viewDidLoad()
 
-            title = "Edit Profile"
-
             setupNavigation()
             setupActions()
             bindViewModel()
@@ -71,6 +69,8 @@ private extension EditProfileViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.editProfileView.configure(with: state)
+                self?.title = AppStrings.editProfile(state.language)
+                self?.navigationItem.leftBarButtonItem?.title = AppStrings.cancel(state.language)
             }
             .store(in: &cancellables)
     }

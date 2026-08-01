@@ -64,10 +64,15 @@ final class ProfileView: UIView {
             avatarImageView.tintColor = .appOrange
         }
         nameLabel.text = state.userName
+        quoteTitleLabel.text = state.quoteTitle
         quoteTextLabel.text = state.quoteText
         quoteAuthorLabel.text = state.quoteAuthor.map { "— \($0)" }
         quoteAuthorLabel.isHidden = state.quoteAuthor == nil
-        bubbleStatsView.configure(with: state.bubbleMetrics)
+        settingsTitleLabel.text = state.settingsTitle
+        bubbleStatsView.configure(
+            title: state.weeklySnapshotTitle,
+            metrics: state.bubbleMetrics
+        )
 
         renderSettingsItems(state.settingsItems)
     }
@@ -102,7 +107,6 @@ private extension ProfileView {
         editProfileButton.layer.cornerRadius = Layout.editButtonSize / 2
         editProfileButton.addTarget(self, action: #selector(didTapEditProfile), for: .touchUpInside)
 
-        quoteTitleLabel.text = "Quote of the day"
         quoteTitleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 16)
         quoteTitleLabel.textColor = .label
 
@@ -119,7 +123,6 @@ private extension ProfileView {
         quoteStackView.addArrangedSubview(quoteTextLabel)
         quoteStackView.addArrangedSubview(quoteAuthorLabel)
 
-        settingsTitleLabel.text = "Settings"
         settingsTitleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 20)
         settingsTitleLabel.textColor = .label
 
@@ -332,7 +335,9 @@ private final class ProfileBubbleStatsView: UIView {
         fatalError()
     }
 
-    func configure(with metrics: [ProfileBubbleMetric]) {
+    func configure(title: String, metrics: [ProfileBubbleMetric]) {
+        titleLabel.text = title
+
         let bubbles = [
             currentStreakBubble,
             bestStreakBubble,
@@ -349,7 +354,6 @@ private final class ProfileBubbleStatsView: UIView {
         backgroundColor = .clear
         layer.cornerRadius = Layout.cornerRadius
 
-        titleLabel.text = "Weekly snapshot"
         titleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 18)
         titleLabel.textColor = .label
 

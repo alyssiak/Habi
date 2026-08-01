@@ -33,4 +33,14 @@ enum AppTheme: String, CaseIterable {
             return .dark
         }
     }
+
+    func apply() {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .forEach { window in
+                window.overrideUserInterfaceStyle = userInterfaceStyle
+                window.rootViewController?.setNeedsStatusBarAppearanceUpdate()
+            }
+    }
 }

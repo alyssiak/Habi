@@ -29,6 +29,7 @@ final class HabitTrackerViewController: UIViewController {
     private let todayProgressView = TodayProgressView()
 
     private var habitModels: [HabitCardModel] = []
+    private var language: AppLanguage = .english
     private let viewModel: HabitTrackerViewModel
     private var archivedHabitStack: [ArchivedHabitUndoItem] = []
     private var hideUndoBannerWorkItem: DispatchWorkItem?
@@ -110,7 +111,7 @@ private extension HabitTrackerViewController {
         avatarImageView.layer.cornerRadius = Layout.avatarSize / 2
         avatarImageView.clipsToBounds = true
 
-        greetingLabel.text = "Hello!"
+        greetingLabel.text = AppStrings.greeting(name: "Alice", language: language)
         greetingLabel.font = UIFont(name: "Montserrat-SemiBold", size: 24)
 
         addHabitButton.setImage(UIImage(systemName: "plus"), for: .normal)
@@ -188,12 +189,12 @@ private extension HabitTrackerViewController {
     }
 
     func setupEmptyState() {
-        emptyTitleLabel.text = "No habits yet"
+        emptyTitleLabel.text = AppStrings.noHabitsTitle(language)
         emptyTitleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 20)
         emptyTitleLabel.textColor = .label
         emptyTitleLabel.textAlignment = .center
 
-        emptySubtitleLabel.text = "Tap + to add your first habit"
+        emptySubtitleLabel.text = AppStrings.noHabitsSubtitle(language)
         emptySubtitleLabel.font = UIFont(name: "Montserrat-Regular", size: 15)
         emptySubtitleLabel.textColor = .secondaryLabel
         emptySubtitleLabel.textAlignment = .center
@@ -221,7 +222,7 @@ private extension HabitTrackerViewController {
         undoMessageLabel.numberOfLines = 1
         undoMessageLabel.lineBreakMode = .byTruncatingTail
 
-        undoButton.setTitle("Undo", for: .normal)
+        undoButton.setTitle(AppStrings.undo(language), for: .normal)
         undoButton.setTitleColor(.systemOrange, for: .normal)
         undoButton.titleLabel?.font = UIFont(name: "Montserrat-SemiBold", size: 14)
         undoButton.addTarget(self, action: #selector(didTapUndoDelete), for: .touchUpInside)
@@ -319,7 +320,11 @@ private extension HabitTrackerViewController {
     }
 
     func renderProfile(_ state: HabitHeaderProfileState) {
-        greetingLabel.text = "Hello, \(state.name)!"
+        language = state.language
+        greetingLabel.text = AppStrings.greeting(name: state.name, language: state.language)
+        emptyTitleLabel.text = AppStrings.noHabitsTitle(state.language)
+        emptySubtitleLabel.text = AppStrings.noHabitsSubtitle(state.language)
+        undoButton.setTitle(AppStrings.undo(state.language), for: .normal)
 
         if let avatarData = state.avatarData,
            let image = UIImage(data: avatarData) {
@@ -371,16 +376,16 @@ private extension HabitTrackerViewController {
         completion: @escaping (Bool) -> Void = { _ in }
     ) {
         let alertController = UIAlertController(
-            title: "Delete habit?",
-            message: "This will remove \"\(model.title)\" from your list. You can undo it right after.",
+            title: AppStrings.deleteHabitTitle(language),
+            message: AppStrings.deleteHabitMessage(title: model.title, language: language),
             preferredStyle: .alert
         )
 
-        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+        alertController.addAction(UIAlertAction(title: AppStrings.cancel(language), style: .cancel) { _ in
             completion(false)
         })
 
-        alertController.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+        alertController.addAction(UIAlertAction(title: AppStrings.delete(language), style: .destructive) { [weak self] _ in
             guard let self else {
                 completion(false)
                 return
@@ -431,9 +436,15 @@ private extension HabitTrackerViewController {
 
     func updateUndoBannerText() {
         if archivedHabitStack.count > 1 {
-            undoMessageLabel.text = "\(archivedHabitStack.count) habits deleted"
+            undoMessageLabel.text = AppStrings.deletedMany(
+                count: archivedHabitStack.count,
+                language: language
+            )
         } else if let item = archivedHabitStack.last {
-            undoMessageLabel.text = "\"\(item.title)\" deleted"
+            undoMessageLabel.text = AppStrings.deletedOne(
+                title: item.title,
+                language: language
+            )
         }
     }
 
@@ -526,7 +537,7 @@ extension HabitTrackerViewController: UITableViewDelegate {
 
         let deleteAction = UIContextualAction(
             style: .destructive,
-            title: "Delete"
+            title: AppStrings.delete(language)
         ) { [weak self] _, _, completion in
             guard let self else {
                 completion(false)
@@ -548,7 +559,7 @@ extension HabitTrackerViewController: UITableViewDelegate {
     ) -> UISwipeActionsConfiguration? {
         let model = habitModels[indexPath.section]
 
-        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] _, _, completion in
+        let editAction = UIContextualAction(style: .normal, title: AppStrings.edit(language)) { [weak self] _, _, completion in
             guard let self else {
                 completion(false)
                 return
@@ -572,17 +583,18 @@ extension HabitTrackerViewController: UITableViewDelegate {
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
         let model = habitModels[indexPath.section]
+        let currentLanguage = language
 
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
             let editAction = UIAction(
-                title: "Edit",
+                title: AppStrings.edit(currentLanguage),
                 image: UIImage(systemName: "square.and.pencil")
             ) { _ in
                 self?.openEditHabit(model: model)
             }
 
             let deleteAction = UIAction(
-                title: "Delete",
+                title: AppStrings.delete(currentLanguage),
                 image: UIImage(systemName: "trash"),
                 attributes: .destructive
             ) { [weak self] _ in

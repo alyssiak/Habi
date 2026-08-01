@@ -58,7 +58,7 @@ final class AddHabitView: UIView {
     
     //MARK: - Private Methods
     private func setupView() {
-        backgroundColor = .white
+        backgroundColor = .appBackground
         scrollView.showsVerticalScrollIndicator = false
         scrollView.keyboardDismissMode = .interactive
         

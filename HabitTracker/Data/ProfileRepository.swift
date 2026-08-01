@@ -16,6 +16,7 @@ protocol ProfileRepositoryProtocol {
     func updateName(_ name: String)
     func updateAvatarData(_ data: Data?)
     func updateTheme(_ theme: AppTheme)
+    func updateLanguage(_ language: AppLanguage)
 }
 
 final class CoreDataProfileRepository: ProfileRepositoryProtocol {
@@ -33,12 +34,14 @@ final class CoreDataProfileRepository: ProfileRepositoryProtocol {
     func fetchProfile() -> UserProfileModel {
         let profile = fetchOrCreateProfile()
         let theme = AppTheme(rawValue: profile.themeRawValue ?? "") ?? .system
+        let language = AppLanguage(rawValue: profile.languageRawValue ?? "") ?? .english
 
         return UserProfileModel(
             id: profile.id,
             name: profile.name ?? "Alice",
             avatarData: profile.avatarData,
-            theme: theme
+            theme: theme,
+            language: language
         )
     }
 
@@ -68,6 +71,13 @@ final class CoreDataProfileRepository: ProfileRepositoryProtocol {
         profile.updatedAt = Date()
         save()
     }
+
+    func updateLanguage(_ language: AppLanguage) {
+        let profile = fetchOrCreateProfile()
+        profile.languageRawValue = language.rawValue
+        profile.updatedAt = Date()
+        save()
+    }
 }
 
 private extension CoreDataProfileRepository {
@@ -81,6 +91,7 @@ private extension CoreDataProfileRepository {
         profile.name = "Alice"
         profile.avatarData = nil
         profile.themeRawValue = AppTheme.system.rawValue
+        profile.languageRawValue = AppLanguage.english.rawValue
         profile.createdAt = Date()
         profile.updatedAt = Date()
         save()
