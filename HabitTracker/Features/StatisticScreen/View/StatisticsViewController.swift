@@ -11,12 +11,17 @@ import Combine
 final class StatisticsViewController: UIViewController {
     //MARK: - Propetries
     private let viewModel: StatisticsViewModel
+    private let profileRepository: ProfileRepositoryProtocol
     private var cancellables = Set<AnyCancellable>()
     private let statisticsView = StatisticsView()
     
     //MARK: - Init
-    init(viewModel: StatisticsViewModel) {
+    init(
+        viewModel: StatisticsViewModel,
+        profileRepository: ProfileRepositoryProtocol
+    ) {
         self.viewModel = viewModel
+        self.profileRepository = profileRepository
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -31,6 +36,7 @@ final class StatisticsViewController: UIViewController {
         setupViewController()
         setupActions()
         bindViewModel()
+        renderLanguage(profileRepository.fetchProfile().language)
         viewModel.loadStatistics()
     }
     
@@ -54,8 +60,7 @@ final class StatisticsViewController: UIViewController {
     }
     
     private func setupViewController() {
-        title = "Statistics"
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
     }
     
     private func bindViewModel() {
@@ -65,5 +70,18 @@ final class StatisticsViewController: UIViewController {
                 self?.statisticsView.render(state)
             }
             .store(in: &cancellables)
+
+        profileRepository.changesPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                guard let self else { return }
+                renderLanguage(profileRepository.fetchProfile().language)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func renderLanguage(_ language: AppLanguage) {
+        title = AppStrings.statisticsTab(language)
+        statisticsView.renderLanguage(language)
     }
 }

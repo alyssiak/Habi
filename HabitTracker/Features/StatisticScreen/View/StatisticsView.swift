@@ -61,6 +61,11 @@ final class StatisticsView: UIView {
         renderTopHabits(state.topHabitProgressItems)
         
     }
+
+    func renderLanguage(_ language: AppLanguage) {
+        periodSegmentedControl.setTitle(makeWeeklyTitle(language), forSegmentAt: 0)
+        periodSegmentedControl.setTitle(makeMonthlyTitle(language), forSegmentAt: 1)
+    }
     
     //MARK: - Actions
     @objc private func didChangePeriod() {
@@ -75,10 +80,30 @@ final class StatisticsView: UIView {
     }
 }
 
+private extension StatisticsView {
+    func makeWeeklyTitle(_ language: AppLanguage) -> String {
+        switch language {
+        case .english:
+            return "Weekly"
+        case .russian:
+            return "Неделя"
+        }
+    }
+
+    func makeMonthlyTitle(_ language: AppLanguage) -> String {
+        switch language {
+        case .english:
+            return "Monthly"
+        case .russian:
+            return "Месяц"
+        }
+    }
+}
+
 //MARK: - Setup methods
 private extension StatisticsView {
     func setupView() {
-        backgroundColor = .systemBackground
+        backgroundColor = .appBackground
 
         addSubview(scrollView)
         scrollView.addSubview(contentView)

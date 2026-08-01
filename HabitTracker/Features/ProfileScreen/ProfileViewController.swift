@@ -6,7 +6,143 @@
 //
 
 import UIKit
+import Combine
 
 final class ProfileViewController: UIViewController {
-    
+    private let profileView = ProfileView()
+    private let viewModel: ProfileViewModel
+    private let makeEditProfileViewController: () -> UIViewController
+    private var cancellables = Set<AnyCancellable>()
+
+    //MARK: - Initialization
+    init(
+        viewModel: ProfileViewModel,
+        makeEditProfileViewController: @escaping () -> UIViewController
+    ) {
+        self.viewModel = viewModel
+        self.makeEditProfileViewController = makeEditProfileViewController
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
+
+    //MARK: - Lifecycle
+    override func loadView() {
+        view = profileView
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        bindViewModel()
+        setupActions()
+        viewModel.loadProfile()
+        Task {
+            await viewModel.loadQuote()
+        }
+    }
+}
+
+private extension ProfileViewController {
+    func bindViewModel() {
+        viewModel.$state
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                self?.profileView.configure(with: state)
+                self?.applyTheme(state.theme)
+                self?.applyLanguage(state.language)
+            }
+            .store(in: &cancellables)
+    }
+
+    func setupActions() {
+        profileView.onEditProfileTapped = { [weak self] in
+            self?.openEditProfile()
+        }
+
+        profileView.onSettingsItemTapped = { [weak self] action in
+            self?.handleSettingsAction(action)
+        }
+    }
+
+    func openEditProfile() {
+        let editProfileViewController = makeEditProfileViewController()
+        let navigationController = UINavigationController(rootViewController: editProfileViewController)
+
+        present(navigationController, animated: true)
+    }
+
+    func handleSettingsAction(_ action: ProfileSettingsAction) {
+        switch action {
+        case .theme:
+            showThemePicker()
+        case .language:
+            showLanguagePicker()
+        case .reminders, .about:
+            break
+        }
+    }
+
+    func showThemePicker() {
+        let language = viewModel.state.language
+        let selectedTheme = viewModel.state.theme
+        let options = AppTheme.allCases.map { theme in
+            SettingsOptionItem(
+                id: theme.rawValue,
+                title: AppStrings.themeTitle(theme, language: language),
+                isSelected: theme == selectedTheme
+            )
+        }
+
+        let viewController = SettingsOptionPickerViewController(
+            title: AppStrings.theme(language),
+            options: options
+        ) { [weak self] option in
+            guard let theme = AppTheme(rawValue: option.id) else {
+                return
+            }
+
+            self?.viewModel.updateTheme(theme)
+            self?.applyTheme(theme)
+        }
+
+        present(viewController, animated: true)
+    }
+
+    func showLanguagePicker() {
+        let selectedLanguage = viewModel.state.language
+        let options = AppLanguage.allCases.map { language in
+            SettingsOptionItem(
+                id: language.rawValue,
+                title: language.title,
+                isSelected: language == selectedLanguage
+            )
+        }
+
+        let viewController = SettingsOptionPickerViewController(
+            title: AppStrings.language(selectedLanguage),
+            options: options
+        ) { [weak self] option in
+            guard let language = AppLanguage(rawValue: option.id) else {
+                return
+            }
+
+            self?.viewModel.updateLanguage(language)
+            self?.applyLanguage(language)
+        }
+
+        present(viewController, animated: true)
+    }
+
+    func applyTheme(_ theme: AppTheme) {
+        theme.apply()
+    }
+
+    func applyLanguage(_ language: AppLanguage) {
+        tabBarController?.viewControllers?[0].tabBarItem.title = AppStrings.habitsTab(language)
+        tabBarController?.viewControllers?[1].tabBarItem.title = AppStrings.statisticsTab(language)
+        tabBarController?.viewControllers?[2].tabBarItem.title = AppStrings.profileTab(language)
+    }
 }

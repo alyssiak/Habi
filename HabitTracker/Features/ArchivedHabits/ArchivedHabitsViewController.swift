@@ -11,6 +11,10 @@ import Combine
 final class ArchivedHabitsViewController: UIViewController {
     //MARK: - Properties
     private let viewModel: ArchivedHabitsViewModel
+    private let profileRepository: ProfileRepositoryProtocol
+    private var language: AppLanguage {
+        profileRepository.fetchProfile().language
+    }
     private var habits: [ArchivedHabitModel] = []
     private var cancellables = Set<AnyCancellable>()
     
@@ -22,8 +26,12 @@ final class ArchivedHabitsViewController: UIViewController {
     
     
     //MARK: - Init
-    init(viewModel: ArchivedHabitsViewModel) {
+    init(
+        viewModel: ArchivedHabitsViewModel,
+        profileRepository: ProfileRepositoryProtocol
+    ) {
         self.viewModel = viewModel
+        self.profileRepository = profileRepository
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -49,9 +57,9 @@ final class ArchivedHabitsViewController: UIViewController {
     // MARK: - Setup
     private extension ArchivedHabitsViewController {
         func setupView() {
-            view.backgroundColor = .systemBackground
+            view.backgroundColor = .appBackground
             
-            titleLabel.text = "Archive"
+            titleLabel.text = AppStrings.archive(language)
             titleLabel.font = UIFont(name: "Montserrat-SemiBold", size: 16)
             titleLabel.textColor = .label
             
@@ -85,7 +93,7 @@ final class ArchivedHabitsViewController: UIViewController {
         }
         
         func setupEmptyState() {
-            emptyStateLabel.text = "No archived habits yet."
+            emptyStateLabel.text = AppStrings.noArchivedHabits(language)
             emptyStateLabel.font = UIFont(name: "Montserrat-Regular", size: 16)
             emptyStateLabel.textColor = .secondaryLabel
             emptyStateLabel.textAlignment = .center
@@ -155,13 +163,13 @@ final class ArchivedHabitsViewController: UIViewController {
 
         @objc private func didTapDeleteAll() {
             let alert = UIAlertController(
-                title: "Delete all archived habits?",
-                message: "This action cannot be undone.",
+                title: AppStrings.deleteAllArchivedTitle(language),
+                message: AppStrings.cannotBeUndone(language),
                 preferredStyle: .alert
             )
 
-            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-            alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            alert.addAction(UIAlertAction(title: AppStrings.cancel(language), style: .cancel))
+            alert.addAction(UIAlertAction(title: AppStrings.delete(language), style: .destructive) { [weak self] _ in
                 self?.viewModel.permanentlyDeleteAllArchivedHabits()
             })
 
@@ -173,16 +181,16 @@ final class ArchivedHabitsViewController: UIViewController {
             completion: @escaping (Bool) -> Void
         ) {
             let alert = UIAlertController(
-                title: "Delete forever?",
-                message: "This will permanently delete \"\(habit.title)\" and its progress history.",
+                title: AppStrings.deleteForeverTitle(language),
+                message: AppStrings.deleteForeverMessage(title: habit.title, language: language),
                 preferredStyle: .alert
             )
 
-            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            alert.addAction(UIAlertAction(title: AppStrings.cancel(language), style: .cancel) { _ in
                 completion(false)
             })
 
-            alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            alert.addAction(UIAlertAction(title: AppStrings.delete(language), style: .destructive) { [weak self] _ in
                 self?.viewModel.permanentlyDeleteHabit(for: habit.id)
                 completion(true)
             })
@@ -228,7 +236,7 @@ extension ArchivedHabitsViewController: UITableViewDataSource {
             
             let deleteAction = UIContextualAction(
                 style: .destructive,
-                title: "Delete"
+                title: AppStrings.delete(language)
             ) { [weak self] _, _, completion in
                 self?.confirmPermanentDelete(habit: habit, completion: completion)
             }
@@ -240,4 +248,3 @@ extension ArchivedHabitsViewController: UITableViewDataSource {
             return configuration
         }
     }
-

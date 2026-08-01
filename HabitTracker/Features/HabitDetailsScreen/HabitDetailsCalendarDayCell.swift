@@ -37,7 +37,7 @@ final class HabitDetailsCalendarDayCell: UICollectionViewCell {
         
         dayLabel.text = nil
         dayLabel.isHidden = false
-        contentView.backgroundColor = .systemBackground
+        contentView.backgroundColor = .appBackground
     }
     
     // Публичный метод ячейки для каждого дня

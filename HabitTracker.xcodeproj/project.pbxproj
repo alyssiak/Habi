@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		F61DCA102FB34EC800BB09B3 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = F61DCA0F2FB34EC800BB09B3 /* SnapKit */; };
-		F6FB29ED2FB6714A00FB4E39 /* AGENTS.md in Resources */ = {isa = PBXBuildFile; fileRef = F6FB29EC2FB6714600FB4E39 /* AGENTS.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,7 +23,6 @@
 /* Begin PBXFileReference section */
 		F61C13FF2FED25B0003B597C /* HabitStatsCalculatorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HabitStatsCalculatorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F664A88B2FA3617600CB0B97 /* HabitTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HabitTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F6FB29EC2FB6714600FB4E39 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -75,7 +73,6 @@
 		F664A8822FA3617600CB0B97 = {
 			isa = PBXGroup;
 			children = (
-				F6FB29EC2FB6714600FB4E39 /* AGENTS.md */,
 				F61C14002FED25B0003B597C /* HabitStatsCalculatorTests */,
 				F664A88C2FA3617600CB0B97 /* Products */,
 				F664A88D2FA3617600CB0B97 /* HabitTracker */,
@@ -194,7 +191,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F6FB29ED2FB6714A00FB4E39 /* AGENTS.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

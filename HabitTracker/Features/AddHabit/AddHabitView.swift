@@ -58,7 +58,7 @@ final class AddHabitView: UIView {
     
     //MARK: - Private Methods
     private func setupView() {
-        backgroundColor = .white
+        backgroundColor = .appBackground
         scrollView.showsVerticalScrollIndicator = false
         scrollView.keyboardDismissMode = .interactive
         
@@ -94,7 +94,7 @@ final class AddHabitView: UIView {
         
         descriptionTextView.font = UIFont(name: "Montserrat-Regular", size: 16)
         descriptionTextView.textColor = .label
-        descriptionTextView.backgroundColor = .secondarySystemBackground
+        descriptionTextView.backgroundColor = .appSecondaryBackground
         descriptionTextView.layer.cornerRadius = 8
         descriptionTextView.textContainerInset = UIEdgeInsets(
             top: 10,

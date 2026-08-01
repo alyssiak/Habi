@@ -85,20 +85,30 @@ private extension AddHabitViewController {
     }
 
     func configureMode() {
+        let language = viewModel.currentLanguage()
+        addHabitView.cancelButton.setTitle(AppStrings.cancel(language), for: .normal)
+        addHabitView.titleErrorLabel.text = AppStrings.enterHabitName(language)
+        addHabitView.nameTitleLabel.text = AppStrings.habitName(language)
+        addHabitView.titleTextField.placeholder = AppStrings.habitNamePlaceholder(language)
+        addHabitView.descriptionTitleLabel.text = AppStrings.description(language)
+        addHabitView.descriptionPlaceholderLabel.text = AppStrings.shortNote(language)
+        addHabitView.emojiTitleLabel.text = AppStrings.emoji(language)
+        addHabitView.colorTitleLabel.text = AppStrings.color(language)
+
         switch mode {
             case .add:
-                addHabitView.screenTitleLabel.text = "Add Habit"
+                addHabitView.screenTitleLabel.text = AppStrings.addHabit(language)
                 selectedColor = colorList.first?.hex
                 selectedEmoji = emojiList.first
                 addHabitView.descriptionTextView.text = nil
-                addHabitView.saveButton.setTitle("Save", for: .normal)
+                addHabitView.saveButton.setTitle(AppStrings.save(language), for: .normal)
             case .edit(let model):
-                addHabitView.screenTitleLabel.text = "Edit Habit"
+                addHabitView.screenTitleLabel.text = AppStrings.editHabit(language)
                 selectedColor = model.colorHex
                 selectedEmoji = model.emoji
                 addHabitView.titleTextField.text = model.title
                 addHabitView.descriptionTextView.text = model.descriptionText
-                addHabitView.saveButton.setTitle("Update", for: .normal)
+                addHabitView.saveButton.setTitle(AppStrings.update(language), for: .normal)
         }
         
         addHabitView.emojiCollectionView.reloadData()

@@ -39,7 +39,7 @@ final class TopHabitsChartView: UIView {
 //MARK: - Setup
 private extension TopHabitsChartView {
     func setupView() {
-        backgroundColor = .secondarySystemBackground
+        backgroundColor = .appSecondaryBackground
         layer.cornerRadius = 16
     }
 

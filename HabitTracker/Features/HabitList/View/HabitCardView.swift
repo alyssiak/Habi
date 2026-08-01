@@ -78,7 +78,7 @@ final class HabitCardView: UIView {
     
     //MARK: - Setup UI
     private func setupView() {
-        backgroundColor = .secondarySystemBackground
+        backgroundColor = .appSecondaryBackground
         layer.cornerRadius = 8
     }
     

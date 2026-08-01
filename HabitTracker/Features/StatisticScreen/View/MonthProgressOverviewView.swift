@@ -65,7 +65,7 @@ final class MonthProgressOverviewView: UIView {
 //MARK: - Setup
 private extension MonthProgressOverviewView {
     func setupView() {
-        backgroundColor = .secondarySystemBackground
+        backgroundColor = .appSecondaryBackground
         layer.cornerRadius = 16
     }
 

@@ -107,7 +107,7 @@ final class HabitDetailsViewController: UIViewController {
     
     //MARK: - Setup views
     func setupView() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
         statsView.configure(completedDays: 20, bestStreak: 5)
         view.addSubview(statsView)
         view.addSubview(calendarView)

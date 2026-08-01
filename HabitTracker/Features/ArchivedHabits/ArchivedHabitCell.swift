@@ -58,7 +58,7 @@ final class ArchivedHabitCell: UITableViewCell {
         contentView.backgroundColor = .clear
         
         containerView.layer.cornerRadius = 8
-        containerView.backgroundColor = .secondarySystemBackground
+        containerView.backgroundColor = .appSecondaryBackground
     }
     
     private func setupContent() {
@@ -77,7 +77,7 @@ final class ArchivedHabitCell: UITableViewCell {
 
         restoreButton.setImage(UIImage(systemName: "arrow.uturn.backward"), for: .normal)
         restoreButton.tintColor = .systemOrange
-        restoreButton.backgroundColor = .systemBackground
+        restoreButton.backgroundColor = .appBackground
         restoreButton.layer.cornerRadius = 18
         restoreButton.addTarget(self, action: #selector(didTapRestore), for: .touchUpInside)
 
