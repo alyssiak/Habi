@@ -13,6 +13,9 @@ xcuserdata/
 # Logs
 *.log
 
+# Codex local instructions
+AGENTS.md
+
 # Secrets
 .env
 *.env
