@@ -2,7 +2,7 @@
 
 Habi is a UIKit habit tracking app for building daily routines, tracking progress, and staying consistent.
 
-The project was built as a portfolio iOS app with a focus on clean UIKit architecture, local persistence, custom UI, and a polished MVP experience.
+The project was built as a iOS app with a focus on clean UIKit architecture, local persistence, custom UI, and a polished MVP experience.
 
 ## Features
 
@@ -38,8 +38,6 @@ The app follows MVVM with dependency injection:
 - `AppAssembly` and `AppDependencyContainer` create and inject dependencies.
 - `Combine` is used to publish state changes from ViewModels to ViewControllers.
 
-This keeps UIKit screens focused on presentation while persistence and business rules stay in separate layers.
-
 ## Persistence
 
 Habi stores habits, habit records, profile data, theme, and language preferences locally with Core Data.
@@ -62,7 +60,3 @@ The project includes XCTest coverage for:
 - weekly habit frequency
 - CI/Fastlane setup
 - App Store screenshots
-
-## Author
-
-Built by Alice Kamyshenko as an iOS portfolio project.
